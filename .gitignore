@@ -1,0 +1,39 @@
+# IDE
+.idea/
+.vscode/
+
+# CMake и сборочные файлы
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.o
+*.obj
+*.exe
+*.lib
+*.dll
+*.gcda
+*.gcno
+*.gcov
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.venv/
+venv/
+
+# Временные и OS файлы
+.DS_Store
+*.tmp
+*.bak
+*.swp
+*.log
+для тренировки хуйни/
+
+# Исключения для нужных файлов
+!extern/conanfile.txt
+!extern/conan_profiles/
+!CMakeLists.txt

@@ -1,0 +1,14 @@
+[requires]
+boost/1.88.0
+sqlite3/3.50.4
+sqlitecpp/3.3.3
+gtest/1.17.0
+qt/6.8.3
+spdlog/1.16.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
