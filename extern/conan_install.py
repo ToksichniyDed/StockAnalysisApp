@@ -4,7 +4,8 @@ from pathlib import Path
 # Пути до исходных профилей (твоих конфигов)
 source_profiles = {
     "windows_clang_debug": Path("conan_profiles/windows_clang_debug"),
-    "windows_gcc_debug": Path("conan_profiles/windows_gcc_debug")
+    "windows_gcc_debug": Path("conan_profiles/windows_gcc_debug"),
+    "windows_msvc_debug": Path("conan_profiles/windows_msvc_debug")
 }
 
 # Директория профилей Conan 2

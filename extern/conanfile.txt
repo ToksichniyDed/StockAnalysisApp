@@ -1,5 +1,6 @@
 [requires]
 boost/1.88.0
+di/1.3.2
 sqlite3/3.50.4
 sqlitecpp/3.3.3
 gtest/1.17.0
