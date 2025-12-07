@@ -32,8 +32,3 @@ venv/
 *.swp
 *.log
 для тренировки хуйни/
-
-# Исключения для нужных файлов
-!extern/conanfile.txt
-!extern/conan_profiles/
-!CMakeLists.txt
