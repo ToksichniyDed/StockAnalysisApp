@@ -1,18 +1,19 @@
 import shutil
 from pathlib import Path
 
-# Пути до исходных профилей (твоих конфигов)
-source_profiles = {
-    "windows_clang_debug": Path("conan_profiles/windows_clang_debug"),
-    "windows_gcc_debug": Path("conan_profiles/windows_gcc_debug"),
-    "windows_msvc_debug": Path("conan_profiles/windows_msvc_debug")
-}
+#Путь до исходной папки
+source_dir = Path("conan_profiles")
 
-# Директория профилей Conan 2
+#Директория профилей Conan 2
 conan_profiles_dir = Path.home() / ".conan2" / "profiles"
 conan_profiles_dir.mkdir(parents=True, exist_ok=True)
 
-for name, src_path in source_profiles.items():
-    dest_path = conan_profiles_dir / name
-    shutil.copy(src_path, dest_path)
-    print(f"Профиль {name} скопирован в {dest_path}")
+#Копируем все элементы (файлы и подпапки) из source_dir в conan_profiles_dir (с overwrite)
+for item in source_dir.iterdir():
+    dest_item = conan_profiles_dir / item.name
+    if item.is_dir():
+        shutil.copytree(item, dest_item, dirs_exist_ok=True)
+    else:
+        shutil.copy(item, dest_item)
+
+print(f"Все элементы из {source_dir} скопированы в {conan_profiles_dir}")
