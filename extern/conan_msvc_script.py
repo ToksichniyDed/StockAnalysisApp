@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.stdout.reconfigure(encoding='utf-8')
 
 def checkWindows() -> bool:
     if platform.system() != "Windows":
@@ -25,36 +26,6 @@ def findConan() -> bool:
         print("❌ Conan не найден в PATH")
         print("   Установите: pip install conan>=2.0")
         return False
-
-
-def checkMSVC() -> bool:
-    try:
-        result = subprocess.run(
-            ["cl"],
-            capture_output=True,
-            text=True,
-            check=False
-        )
-        # cl без аргументов выводит версию в stderr
-        output = result.stderr
-        if "Microsoft (R) C/C++ Optimizing Compiler" in output:
-            version_line = output.split('\n')[0]
-            print(f"✓ {version_line}")
-
-            # Проверка версии для C++23
-            if "19.4" in output or "Version 19.4" in output:
-                print("  ✓ Поддержка C++23 подтверждена")
-            else:
-                print("  ⚠️  Для C++23 нужен MSVC 19.40+ (VS 2022 17.10+)")
-            return True
-    except FileNotFoundError:
-        pass
-
-    print("❌ MSVC не найден")
-    print("   Запустите из Developer Command Prompt for VS 2022")
-    print("   Или установите Visual Studio 2022 с C++ workload")
-    return False
-
 
 def installDependencies(profileName: str) -> bool:
     scriptDir = Path(__file__).parent.resolve()
@@ -92,32 +63,11 @@ def installDependencies(profileName: str) -> bool:
 
 def main():
     print("=" * 60)
-    print("  Установка Conan зависимостей")
-    print("  Компилятор: MSVC")
-    print("  Конфигурация: Release")
-    print("  Стандарт: C++23")
-    print("  Платформа: Windows")
+    print("  Установка Conan зависимостей (MSVC, Release, C++23)")
     print("=" * 60)
     print()
 
-    if not checkWindows():
-        print()
-        input("Нажмите Enter для выхода...")
-        sys.exit(1)
-
-    if not findConan():
-        print()
-        input("Нажмите Enter для выхода...")
-        sys.exit(1)
-
-    checkMSVC()
-
-    success = installDependencies("windows_msvc_release")
-
-    print()
-    input("Нажмите Enter для выхода...")
-    sys.exit(0 if success else 1)
-
+    installDependencies("windows_msvc_release")
 
 if __name__ == "__main__":
     main()

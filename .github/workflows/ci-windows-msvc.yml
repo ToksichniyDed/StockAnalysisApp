@@ -1,0 +1,57 @@
+name: CI – Windows MSVC Release
+
+on:
+  pull_request:
+    branches: [main, ci_test]
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # 1. Выкачиваем код
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # важно для правильного merge-base в PR
+
+      # 2. Ставим Python
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 3. Устанавливаем Conan через pip
+      - name: Install Conan 2.x
+        run: | 
+          python -m pip install --upgrade pip
+          pip install conan
+          conan --version
+
+      # 4. Установка профилей conan
+      - name: Deploy conan profiles
+        run: |
+          cd extern
+          python ./conan_install.py
+
+      # 5. Сборка extern библиотек
+      - name: Install dependencies
+        run: |
+          cd extern
+          python ./conan_msvc_script.py
+          
+      
+      
+          
+      
+          
+      
+      
+      
+
+
+
+
