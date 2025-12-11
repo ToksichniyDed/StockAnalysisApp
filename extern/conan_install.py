@@ -1,5 +1,8 @@
 import shutil
 from pathlib import Path
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 #Путь до исходной папки
 source_dir = Path("conan_profiles")
