@@ -1,0 +1,55 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+Standard: Cpp23
+ColumnLimit: 120
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+PointerAlignment: Left
+QualifierAlignment: Left
+
+BreakBeforeBraces: Attach
+
+# Выравнивание и переносы
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AlignOperands: Align
+BinPackArguments: false
+BinPackParameters: false
+ContinuationIndentWidth: 4
+
+# Пробелы
+SpaceBeforeParens: ControlStatements
+SpaceBeforeAssignmentOperators: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceInEmptyParentheses: false
+
+# Скобки и блоки
+BraceWrapping:
+  AfterClass: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterEnum: false
+  AfterControlStatement: false
+  BeforeCatch: true
+  BeforeElse: true
+
+# Includes — рабочая группировка для Qt-проектов
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+
+# Дополнительно для чистоты
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All
+ReflowComments: true
+SortUsingDeclarations: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
