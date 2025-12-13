@@ -2,7 +2,7 @@ name: CI – Windows MSVC Release
 
 on:
   pull_request:
-    branches: [main, ci_test]
+    branches: [ main, ci_test ]
 
 jobs:
   build-release:
@@ -18,6 +18,31 @@ jobs:
         with:
           fetch-depth: 0 # важно для правильного merge-base в PR
 
+      - name: Install clang-format
+        if: github.event_name == 'pull_request'   # только в PR
+        run: |
+          choco install llvm --version=19.1.7 -y --force --no-progress
+          refreshenv   # обновляем PATH
+          clang-format --version
+
+      - name: Check code style (clang-format)
+        if: github.event_name == 'pull_request'
+        run: |
+          # Получаем список изменённых C++ файлов в этом PR
+          git fetch origin ${{ github.base_ref }} --no-tags --depth=1
+          $files = git diff --name-only origin/${{ github.base_ref }} HEAD | Where-Object { $_ -match '\.(cpp|h|hpp|cxx|hxx)$' -and (Test-Path $_) }
+          
+          if ($files) {
+          Write-Output "Проверяем стиль в изменённых файлах:"
+          $files | ForEach-Object { Write-Output "  $_" }
+          
+          # -n = dry-run, --Werror = любая разница → ошибка CI
+          clang-format -n --Werror --style=file --fallback-style=none $files
+          } else {
+            Write-Output "Нет изменённых C++/H файлов — проверка стиля пропущена"
+          }
+
+
       # 2. Ставим Python
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -26,7 +51,7 @@ jobs:
 
       # 3. Устанавливаем Conan через pip
       - name: Install Conan 2.x
-        run: | 
+        run: |
           python -m pip install --upgrade pip
           pip install conan
           conan --version
@@ -41,17 +66,4 @@ jobs:
       - name: Install dependencies
         run: |
           cd extern
-          python ./conan_msvc_script.py
-          
-      
-      
-          
-      
-          
-      
-      
-      
-
-
-
-
+          python ./conan_msvc_script.py   
