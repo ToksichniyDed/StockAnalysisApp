@@ -12,12 +12,22 @@ jobs:
         shell: pwsh
 
     steps:
-      # 1. Выкачиваем код
+      # Выкачиваем код
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # важно для правильного merge-base в PR
 
+      # Кэш conan
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: ~\.conan2
+          key: conan2-windows-msvc-${{ hashFiles('conanfile.txt', 'extern/**') }}-v8
+          restore-keys: |
+            conan2-windows-msvc-
+
+      # Установка LLVM
       - name: Install clang-format
         if: github.event_name == 'pull_request'   # только в PR
         run: |
@@ -25,6 +35,7 @@ jobs:
           refreshenv   # обновляем PATH
           clang-format --version
 
+      # Проверка code style
       - name: Check code style (clang-format)
         if: github.event_name == 'pull_request'
         run: |
@@ -42,27 +53,26 @@ jobs:
             Write-Output "Нет изменённых C++/H файлов — проверка стиля пропущена"
           }
 
-
-      # 2. Ставим Python
+      # Ставим Python
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      # 3. Устанавливаем Conan через pip
+      # Устанавливаем Conan через pip
       - name: Install Conan 2.x
         run: |
           python -m pip install --upgrade pip
           pip install conan
           conan --version
 
-      # 4. Установка профилей conan
+      # Установка профилей conan
       - name: Deploy conan profiles
         run: |
           cd extern
           python ./conan_install.py
 
-      # 5. Сборка extern библиотек
+      # Сборка extern библиотек
       - name: Install dependencies
         run: |
           cd extern
