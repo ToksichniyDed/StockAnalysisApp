@@ -1,55 +1,58 @@
+# Generated from CLion C/C++ Code Style settings
 ---
 Language: Cpp
 BasedOnStyle: LLVM
-
-Standard: Cpp23
-ColumnLimit: 120
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-
-PointerAlignment: Left
-QualifierAlignment: Left
-
-BreakBeforeBraces: Attach
-
-# Выравнивание и переносы
-AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
+AccessModifierOffset: -4
+AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
-AlignOperands: Align
-BinPackArguments: false
-BinPackParameters: false
-ContinuationIndentWidth: 4
-
-# Пробелы
-SpaceBeforeParens: ControlStatements
-SpaceBeforeAssignmentOperators: true
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
-SpacesInAngles: false
-SpaceInEmptyParentheses: false
-
-# Скобки и блоки
-BraceWrapping:
+AlignOperands: true
+AlignTrailingComments: false
+AllowShortIfStatementsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BraceWrapping: 
+  AfterCaseLabel: false
   AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
   AfterFunction: false
   AfterNamespace: false
   AfterStruct: false
-  AfterEnum: false
-  AfterControlStatement: false
-  BeforeCatch: true
-  BeforeElse: true
-
-# Includes — рабочая группировка для Qt-проектов
-SortIncludes: CaseSensitive
-IncludeBlocks: Regroup
-
-# Дополнительно для чистоты
-MaxEmptyLinesToKeep: 1
-KeepEmptyLinesAtTheStartOfBlocks: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BreakBeforeBraces: Custom
+BreakConstructorInitializers: AfterColon
+BreakConstructorInitializersBeforeComma: false
+ColumnLimit: 120
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ContinuationIndentWidth: 8
+IncludeCategories: 
+  - Regex: '^<.*'
+    Priority: 1
+  - Regex: '^".*'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IndentCaseLabels: true
+IndentWidth: 4
+InsertNewlineAtEOF: true
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
-ReflowComments: true
-SortUsingDeclarations: true
-AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: false
+PointerAlignment: Left
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInConditionalStatement: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+TabWidth: 4
+UseTab: Always
+...
