@@ -34,17 +34,14 @@ set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release RELEASE "")
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release RELEASE "")
 set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release RELEASE "")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
-qt_standard_project_setup()
+add_subdirectory(AppMainWindow)
+add_subdirectory(StockExchangeConnectors)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt6::Core
-        Qt6::Gui
-        Qt6::Widgets
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE AppMainWindow)
 
 if(WIN32)
     get_target_property(_qt_qmake Qt6::qmake IMPORTED_LOCATION)
