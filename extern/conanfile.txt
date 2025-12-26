@@ -9,6 +9,7 @@ di/1.3.2
 
 [options]
 qt/*:shared=True
+qt/*:qtcharts=True
 
 [generators]
 CMakeDeps
