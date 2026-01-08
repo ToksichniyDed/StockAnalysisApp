@@ -1,5 +1,16 @@
+set(APP_MAIN_WINDOW_SOURCES
+        appmainwindow.cpp
+        appmainwindow.h
+)
+
+set(APP_MAIN_WINDOW_UI
+        AppMainWindow.ui
+)
+
 add_library(AppMainWindow STATIC
-        appmainwindow.cpp)
+        ${APP_MAIN_WINDOW_SOURCES}
+        ${APP_MAIN_WINDOW_UI}
+)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Charts)
 

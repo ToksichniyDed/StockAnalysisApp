@@ -2,7 +2,7 @@
 // Created by DED on 21.12.2025.
 //
 
-export module IExchangeDataFetcher;
+module;
 
 #include <algorithm>
 #include <chrono>
@@ -11,6 +11,8 @@ export module IExchangeDataFetcher;
 #include <string>
 #include <filesystem>
 #include <utility>
+
+export module IExchangeDataFetcher;
 
 import ConfigurationParser;
 
@@ -88,10 +90,10 @@ public:
 		const ExchangeDataFetcher::Timeframe& timeframe = ExchangeDataFetcher::Timeframe::Day) const = 0;
 
 protected:
-	explicit IExchangeDataFetcher(ConfigurationParser  configurationParser):_configurationParser(std::move(configurationParser)){
+	explicit IExchangeDataFetcher(std::shared_ptr<ConfigurationParser> configurationParser):_configurationParser(std::move(configurationParser)){
 
 	};
 
 protected:
-	ConfigurationParser _configurationParser;
+	std::shared_ptr<ConfigurationParser> _configurationParser;
 };

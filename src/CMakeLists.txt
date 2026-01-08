@@ -29,19 +29,31 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+
 # Маппинг: Debug-сборка проекта использует Release-зависимости Conan
 set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release RELEASE "")
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release RELEASE "")
 set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release RELEASE "")
 
 find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(spdlog REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 add_subdirectory(AppMainWindow)
 add_subdirectory(StockExchangeConnectors)
 
 add_executable(${PROJECT_NAME} main.cpp)
+target_sources(${PROJECT_NAME} PUBLIC FILE_SET CXX_MODULES FILES Logger.ixx)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE AppMainWindow)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        Qt6::Core
+        Qt6::Widgets
+        spdlog::spdlog
+        AppMainWindow)
 
 if(WIN32)
     get_target_property(_qt_qmake Qt6::qmake IMPORTED_LOCATION)
@@ -57,6 +69,5 @@ if(WIN32)
 endif ()
 
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /wd5105 /wd5054)
-    target_compile_options(${PROJECT_NAME} PRIVATE /MD$<$<CONFIG:Debug>:d>)
+    target_compile_options(${PROJECT_NAME} PRIVATE /wd5105)
 endif()
