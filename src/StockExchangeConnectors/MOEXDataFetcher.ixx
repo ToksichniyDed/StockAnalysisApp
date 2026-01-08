@@ -2,7 +2,7 @@
 // Created by DED on 21.12.2025.
 //
 
-export module MOEXDataFetcher;
+module;
 
 #include <vector>
 #include <expected>
@@ -15,8 +15,10 @@ export module MOEXDataFetcher;
 #include <boost/json.hpp>
 #include <boost/system/error_code.hpp>
 
-import IExchangeDataFetcher;
+export module MOEXDataFetcher;
+
 import ConfigurationParser;
+import IExchangeDataFetcher;
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -26,6 +28,9 @@ using tcp = net::ip::tcp;
 
 class MoexResponseParser {
 public:
+	MoexResponseParser() = default;
+	~MoexResponseParser() = default;
+
 	[[nodiscard]] std::expected<std::vector<ExchangeDataFetcher::BaseCandle>, ExchangeDataFetcher::FetchError>
 	parse(const std::string_view& jsonBody) const {
 		boost::system::error_code errorCode;
@@ -44,8 +49,9 @@ public:
 
 		if (data.empty()) {
 			return std::unexpected(ExchangeDataFetcher::FetchError{
-			ExchangeDataFetcher::FetchStatus::NoDataFound,
-			std::string("No data found: ")});
+				ExchangeDataFetcher::FetchStatus::NoDataFound,
+				std::string("No data found: ")
+			});
 		}
 
 		std::vector<ExchangeDataFetcher::BaseCandle> candlesVector;
@@ -56,8 +62,9 @@ public:
 
 			if (values.size() != _moexCandleColumnCount) {
 				return std::unexpected(ExchangeDataFetcher::FetchError{
-				ExchangeDataFetcher::FetchStatus::InvalidParameter,
-				std::string("Candles count mismatch: ") + std::to_string(values.size())});
+					ExchangeDataFetcher::FetchStatus::InvalidParameter,
+					std::string("Candles count mismatch: ") + std::to_string(values.size())
+				});
 			}
 
 			ExchangeDataFetcher::BaseCandle candle;
@@ -70,8 +77,10 @@ public:
 			candle.startPoint = parseDateTime(values.at(6).as_string());
 			candle.endPoint = parseDateTime(values.at(6).as_string());
 
-			candlesVector.emplace_back(std::move(candle));
+			candlesVector.push_back(std::move(candle));
 		}
+
+		return candlesVector;
 	}
 
 protected:
@@ -95,13 +104,18 @@ protected:
 	}
 
 protected:
-	constexpr int _moexCandleColumnCount = 8;
+	int _moexCandleColumnCount = 8;
 };
+
+
 
 class MOEXDataFetcher : public IExchangeDataFetcher {
 public:
 	explicit MOEXDataFetcher(const std::filesystem::path& filePath = {}) : IExchangeDataFetcher(
-		std::move(ConfigurationParser(filePath))) {
+		                                                                       std::make_shared<
+			                                                                       ConfigurationParser>(filePath)),
+	                                                                       _moexResponseParser(
+		                                                                       std::make_shared<MoexResponseParser>()) {
 	}
 
 	~MOEXDataFetcher() override = default;
@@ -120,7 +134,7 @@ protected:
 			tcp::resolver resolver(ioContext);
 			beast::ssl_stream<beast::tcp_stream> stream(ioContext, sslContext);
 
-			auto hostOpt = _configurationParser.getValue<std::string>("network.host");
+			auto hostOpt = _configurationParser->getValue<std::string>("network.host");
 			if (!hostOpt.has_value() || hostOpt->empty()) {
 				return std::unexpected(ExchangeDataFetcher::FetchError{
 					ExchangeDataFetcher::FetchStatus::InvalidParameter,
@@ -128,7 +142,7 @@ protected:
 				});
 			}
 
-			auto serviceOpt = _configurationParser.getValue<std::string>("network.service");
+			auto serviceOpt = _configurationParser->getValue<std::string>("network.service");
 			if (!serviceOpt.has_value() || serviceOpt->empty()) {
 				return std::unexpected(ExchangeDataFetcher::FetchError{
 					ExchangeDataFetcher::FetchStatus::InvalidParameter,
@@ -136,7 +150,7 @@ protected:
 				});
 			}
 
-			auto candlesOpt = _configurationParser.getValue<std::string>("requests.candles");
+			auto candlesOpt = _configurationParser->getValue<std::string>("requests.candles");
 			if (!candlesOpt.has_value() || candlesOpt->empty()) {
 				return std::unexpected(ExchangeDataFetcher::FetchError{
 					ExchangeDataFetcher::FetchStatus::InvalidParameter,
@@ -168,7 +182,7 @@ protected:
 				http::request<http::empty_body> req{http::verb::get, pageTarget, 11};
 				req.set(http::field::host, hostOpt.value());
 				req.set(http::field::user_agent,
-				        _configurationParser.getValue<std::string>("http.userAgent", "MOEXFetcher"));
+				        _configurationParser->getValue<std::string>("http.userAgent", "MOEXFetcher"));
 
 				beast::flat_buffer buffer;
 				http::response<http::string_body> res;
@@ -182,7 +196,7 @@ protected:
 					});
 				}
 
-				const auto& parsedResponse= _moexResponseParser.parse(res.body());
+				const auto& parsedResponse = _moexResponseParser->parse(res.body());
 				if (!parsedResponse.has_value()) {
 					return std::unexpected(parsedResponse.error());
 				}
@@ -198,7 +212,7 @@ protected:
 				}
 
 				allCandles.insert(allCandles.end(), std::make_move_iterator(parsedResponse.value().begin()),
-					  std::make_move_iterator(parsedResponse.value().end()));
+				                  std::make_move_iterator(parsedResponse.value().end()));
 
 				start += pageSize;
 			} while (true);
@@ -223,5 +237,5 @@ protected:
 	};
 
 protected:
-	MoexResponseParser _moexResponseParser;
+	std::shared_ptr<MoexResponseParser> _moexResponseParser;
 };

@@ -1,10 +1,17 @@
+#include <spdlog/spdlog.h>
 #include <QApplication>
-#include <QPushButton>
+#include "appmainwindow.h"
+
+import Logger;
+
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    QPushButton button("Hello world!", nullptr);
-    button.resize(200, 100);
-    button.show();
-    return QApplication::exec();
+    Logger::init(true,true, spdlog::level::debug, "logs/{:%Y%m%d}.log" , 50, 10);
+
+	QApplication app(argc, argv);
+
+	AppMainWindow w;
+	w.show();
+
+	return app.exec();
 }
