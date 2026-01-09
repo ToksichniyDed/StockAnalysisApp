@@ -26,30 +26,27 @@ namespace Logger {
 	std::shared_ptr<spdlog::logger> logger;
 
 	export enum class LogLevel : std::underlying_type_t<spdlog::level::level_enum> {
-		Trace   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::trace),
-		Debug   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::debug),
-		Info    = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::info),
-		Warn    = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::warn),
-		Error   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::err),
-		Critical= static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::critical),
-		Off     = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::off)
+		Trace = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::trace),
+		Debug = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::debug),
+		Info = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::info),
+		Warn = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::warn),
+		Error = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::err),
+		Critical = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::critical),
+		Off = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::off)
 	};
 
 	export void init(bool enableConsole, bool enableFile, const spdlog::level::level_enum defaultLevel,
-		  const std::string& fileName, const std::size_t maxSizeMB, const std::size_t maxFiles)
-	{
+	                 const std::string& fileName, const std::size_t maxSizeMB, const std::size_t maxFiles) {
 		std::vector<spdlog::sink_ptr> loggerSinks;
 
-		if (enableConsole)
-		{
+		if (enableConsole) {
 			auto console = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 			console->set_level(spdlog::level::trace);
 			console->set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
 			loggerSinks.push_back(console);
 		}
 
-		if (enableFile)
-		{
+		if (enableFile) {
 			namespace fs = std::filesystem;
 			fs::create_directories("logs");
 
@@ -64,8 +61,7 @@ namespace Logger {
 			loggerSinks.push_back(file);
 		}
 
-		if (loggerSinks.empty())
-		{
+		if (loggerSinks.empty()) {
 			loggerSinks.push_back(std::make_shared<spdlog::sinks::null_sink_st>());
 		}
 
@@ -95,9 +91,22 @@ namespace Logger {
 	export template <LogLevel Level, typename... Args>
 	void log(fmt::format_string<Args...> msg, Args&&... args) {
 		if (logger) {
-			logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG, fmt::format(msg, std::forward<Args>(args)...));
+			logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG,
+			            fmt::format(msg, std::forward<Args>(args)...));
 		}
 	}
 
+	export namespace TestingLogger {
+		void setLogger(std::shared_ptr<spdlog::logger> customLogger) {
+			logger = customLogger;
+		}
 
+		std::shared_ptr<spdlog::logger> getLogger() {
+			return logger;
+		}
+
+		void resetLogger() {
+			logger = nullptr;
+		}
+	}
 }
