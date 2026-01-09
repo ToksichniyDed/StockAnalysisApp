@@ -12,10 +12,28 @@ module;
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/null_sink.h>
 
+#if defined(_MSC_VER)
+#define FUNC_SIG __FUNCSIG__
+#elif defined(__GNUC__) || defined(__clang__)
+#define FUNC_SIG __PRETTY_FUNCTION__
+#else
+#define FUNC_SIG __func__
+#endif
+
 export module Logger;
 
 namespace Logger {
 	std::shared_ptr<spdlog::logger> logger;
+
+	export enum class LogLevel : std::underlying_type_t<spdlog::level::level_enum> {
+		Trace   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::trace),
+		Debug   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::debug),
+		Info    = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::info),
+		Warn    = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::warn),
+		Error   = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::err),
+		Critical= static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::critical),
+		Off     = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::off)
+	};
 
 	export void init(bool enableConsole, bool enableFile, const spdlog::level::level_enum defaultLevel,
 		  const std::string& fileName, const std::size_t maxSizeMB, const std::size_t maxFiles)
@@ -59,9 +77,9 @@ namespace Logger {
 		logger->info("Логирование инициализировано (console: {}, file: {})", enableConsole, enableFile);
 	}
 
-	export void setLoggingLevel(const spdlog::level::level_enum logLevel) {
+	export void setLoggingLevel(const LogLevel logLevel) {
 		if (logger)
-			logger->set_level(logLevel);
+			logger->set_level(static_cast<spdlog::level::level_enum>(logLevel));
 	}
 
 	export void disableLogger() {
@@ -73,4 +91,13 @@ namespace Logger {
 		if (logger)
 			logger->set_level(lvl);
 	}
+
+	export template <LogLevel Level, typename... Args>
+	void log(fmt::format_string<Args...> msg, Args&&... args) {
+		if (logger) {
+			logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG, fmt::format(msg, std::forward<Args>(args)...));
+		}
+	}
+
+
 }
