@@ -10,15 +10,13 @@
 
 QT_BEGIN_NAMESPACE
 
-namespace Ui
-{
+namespace Ui {
     class AppMainWindow;
 }
 
 QT_END_NAMESPACE
 
-class AppMainWindow : public QMainWindow
-{
+class AppMainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
