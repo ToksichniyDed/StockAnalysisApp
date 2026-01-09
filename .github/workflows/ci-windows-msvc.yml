@@ -77,3 +77,18 @@ jobs:
         run: |
           cd extern
           python ./conan_msvc_script.py   
+
+      # Сборка проекта
+      - name: Configure CMake
+        run: |
+          cmake --preset msvc-release
+
+      - name: Build project
+        run: |
+          cmake --build --preset msvc-release --config
+
+      # Автотесты
+      - name: Unit tests
+        run: |
+          cd cmake-build-release-visual-studio
+          .\unit_tests.exe
