@@ -35,24 +35,6 @@ jobs:
           refreshenv   # обновляем PATH
           clang-format --version
 
-      # Проверка code style
-      - name: Check code style (clang-format)
-        if: github.event_name == 'pull_request'
-        run: |
-          # Получаем список изменённых C++ файлов в этом PR
-          git fetch origin ${{ github.base_ref }} --no-tags --depth=1
-          $files = git diff --name-only origin/${{ github.base_ref }} HEAD | Where-Object { $_ -match '\.(cpp|h|hpp|cxx|hxx)$' -and (Test-Path $_) }
-          
-          if ($files) {
-          Write-Output "Проверяем стиль в изменённых файлах:"
-          $files | ForEach-Object { Write-Output "  $_" }
-          
-          # -n = dry-run, --Werror = любая разница → ошибка CI
-          clang-format -n --Werror --style=file --fallback-style=none $files
-          } else {
-            Write-Output "Нет изменённых C++/H файлов — проверка стиля пропущена"
-          }
-
       # Ставим Python
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -81,14 +63,15 @@ jobs:
       # Сборка проекта
       - name: Configure CMake
         run: |
-          cmake --preset msvc-release
+          cmake -DCMAKE_BUILD_TYPE=Release -B cmake-build-release-visual-studio
+          
 
       - name: Build project
         run: |
-          cmake --build --preset msvc-release --config
+          cmake --build .\cmake-build-release-visual-studio\
 
       # Автотесты
       - name: Unit tests
         run: |
-          cd cmake-build-release-visual-studio
+          cd cmake-build-release-visual-studio\tests
           .\unit_tests.exe

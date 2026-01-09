@@ -8,13 +8,10 @@
 #include "ui_AppMainWindow.h"
 
 
-AppMainWindow::AppMainWindow(QWidget* parent) :
-    QMainWindow(parent), ui(new Ui::AppMainWindow)
-{
+AppMainWindow::AppMainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::AppMainWindow) {
     ui->setupUi(this);
 }
 
-AppMainWindow::~AppMainWindow()
-{
+AppMainWindow::~AppMainWindow() {
     delete ui;
 }
