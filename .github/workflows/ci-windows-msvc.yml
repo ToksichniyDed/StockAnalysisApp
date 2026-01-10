@@ -73,5 +73,4 @@ jobs:
       # Автотесты
       - name: Unit tests
         run: |
-          cd cmake-build-release-visual-studio\tests
-          .\unit_tests.exe
+          ctest --test-dir .\cmake-build-release-visual-studio\tests
