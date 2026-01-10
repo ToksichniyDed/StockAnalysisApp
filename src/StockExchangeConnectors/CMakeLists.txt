@@ -10,4 +10,4 @@ find_package(OpenSSL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS json beast)
 find_package(tomlplusplus REQUIRED)
 
-target_link_libraries(StockExchangeConnectors PRIVATE Boost::json Boost::headers OpenSSL::SSL OpenSSL::Crypto tomlplusplus::tomlplusplus Logger)
+target_link_libraries(StockExchangeConnectors PRIVATE Boost::json Boost::headers tomlplusplus::tomlplusplus Logger NetworkTools)

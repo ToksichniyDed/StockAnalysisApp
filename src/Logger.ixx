@@ -6,6 +6,7 @@ module;
 
 #include <memory>
 #include <filesystem>
+#include <utility>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -98,7 +99,7 @@ namespace Logger {
 
     export namespace TestingLogger {
         void setLogger(std::shared_ptr<spdlog::logger> customLogger) {
-            logger = customLogger;
+            logger = std::move(customLogger);
         }
 
         std::shared_ptr<spdlog::logger> getLogger() {
