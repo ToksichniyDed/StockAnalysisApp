@@ -7,6 +7,7 @@ set(CMAKE_AUTORCC ON)
 
 add_subdirectory(AppMainWindow)
 add_subdirectory(StockExchangeConnectors)
+add_subdirectory(NetworkTools)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
@@ -31,6 +32,8 @@ if(WIN32)
             COMMENT "Развёртывание Qt runtime"
             VERBATIM
     )
+
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0A00)
 endif ()
 
 if(MSVC)

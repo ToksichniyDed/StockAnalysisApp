@@ -56,10 +56,8 @@ namespace ExchangeDataFetcher {
         std::string errorMessage;
         std::optional<int64_t> httpStatusCode;
 
-        FetchError(const FetchStatus stat, std::string msg, int code = 0) : status(stat), errorMessage(std::move(msg)),
+        FetchError(const FetchStatus stat, std::string msg, int64_t code = 0) : status(stat), errorMessage(std::move(msg)),
                                                                             httpStatusCode(code) {
-            Logger::log<Logger::LogLevel::Error>("Ошибка запроса данных [статус: {}]: {}", static_cast<int>(status),
-                                                 errorMessage);
         }
     };
 }
