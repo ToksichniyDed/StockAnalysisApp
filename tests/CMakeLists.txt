@@ -1,4 +1,5 @@
 find_package(GTest REQUIRED)
+include(GoogleTest)
 enable_testing()
 
 add_executable(unit_tests
@@ -13,4 +14,4 @@ target_link_libraries(unit_tests PRIVATE
         StockExchangeConnectors
         Logger)
 
-add_test(NAME UnitTests COMMAND unit_tests)
+gtest_discover_tests(unit_tests)
