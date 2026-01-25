@@ -59,20 +59,10 @@ export class BoostBeastHttpClient : public IHttpClient {
 public:
     explicit BoostBeastHttpClient(
         std::chrono::milliseconds timeout = std::chrono::seconds{30},
-        std::string userAgent = "") : _timeout(timeout) {
-
-        Logger::log<Logger::LogLevel::Debug>(
-            "BoostBeastHttpClient initialized (timeout: {}ms)",
-            _timeout.count()
-        );
+        const std::string& userAgent = "") : _timeout(timeout) {
     }
 
     explicit BoostBeastHttpClient(const std::string& userAgent = "") : _timeout(std::chrono::seconds{30}) {
-
-        Logger::log<Logger::LogLevel::Debug>(
-            "BoostBeastHttpClient initialized (timeout: {}ms)",
-            _timeout.count()
-        );
     }
 
     ~BoostBeastHttpClient() override = default;
@@ -95,7 +85,7 @@ public:
             });
         }
 
-        Logger::log<Logger::LogLevel::Debug>(
+        Logger::log<Logger::LogLevel::Info>(
             "GET запрос: {}://{}{}",
             parsedUrl->scheme, parsedUrl->host, parsedUrl->fullPath()
         );
@@ -165,7 +155,7 @@ private:
             stream.socket().shutdown(tcp::socket::shutdown_both, ec);
 
             if (ec) {
-                Logger::log<Logger::LogLevel::Warn>("Ошибка graceful shutdown сокета: {}", ec.message());
+                Logger::log<Logger::LogLevel::Debug>("Ошибка graceful shutdown сокета: {}", ec.message());
             }
 
             Http::Response response {ec.value(), std::move(res.body()), std::move(headers)};

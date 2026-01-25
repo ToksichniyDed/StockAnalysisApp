@@ -73,7 +73,7 @@ public:
             candlesVector.push_back(candle);
         }
 
-        Logger::log<Logger::LogLevel::Info>(
+        Logger::log<Logger::LogLevel::Debug>(
             "Парсинг данных выполнился успешно."
         );
 
