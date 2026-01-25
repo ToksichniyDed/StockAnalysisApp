@@ -5,6 +5,8 @@ enable_testing()
 add_executable(unit_tests
 Logger_Test.cpp)
 
+add_subdirectory(StockExchangeConnectors_Tests)
+
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 target_link_libraries(unit_tests PRIVATE
         GTest::gtest

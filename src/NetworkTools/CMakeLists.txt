@@ -8,4 +8,5 @@ target_link_libraries(NetworkTools PRIVATE Boost::headers OpenSSL::SSL OpenSSL::
 target_sources(NetworkTools PUBLIC FILE_SET CXX_MODULES FILES
         IHttpClient.ixx
         BoostBeastHttpClient.ixx
+        UrlParser.ixx
 )

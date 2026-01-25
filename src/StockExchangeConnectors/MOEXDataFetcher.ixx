@@ -18,92 +18,7 @@ import IExchangeDataFetcher;
 import IHttpClient;
 import BoostBeastHttpClient;
 import Logger;
-
-class MoexResponseParser {
-public:
-    MoexResponseParser() = default;
-    ~MoexResponseParser() = default;
-
-    [[nodiscard]] std::expected<std::vector<ExchangeDataFetcher::BaseCandle>, ExchangeDataFetcher::FetchError>
-    parse(const std::string_view& jsonBody) const {
-        boost::system::error_code errorCode;
-        boost::json::value jsonValue = boost::json::parse(jsonBody, errorCode);
-
-        if (errorCode) {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::ParseError,
-                std::string("MOEX JSON request parse error: ") + errorCode.message()
-            });
-        }
-
-        const boost::json::object& response = jsonValue.as_object();
-        const auto& candles = response.at("candles").as_array();
-        const auto& data = response.at("data").as_array();
-
-        if (data.empty()) {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::NoDataFound,
-                std::string("No data found: ")
-            });
-        }
-
-        std::vector<ExchangeDataFetcher::BaseCandle> candlesVector;
-        candlesVector.reserve(candles.size());
-
-        for (const auto& row : data) {
-            const auto& values = row.as_array();
-
-            if (values.size() != _moexCandleColumnCount) {
-                return std::unexpected(ExchangeDataFetcher::FetchError{
-                    ExchangeDataFetcher::FetchStatus::InvalidParameter,
-                    std::string("Candles count mismatch: ") + std::to_string(values.size())
-                });
-            }
-
-            ExchangeDataFetcher::BaseCandle candle;
-            candle.openValue = values.at(0).as_double();
-            candle.closeValue = values.at(1).as_double();
-            candle.highValue = values.at(2).as_double();
-            candle.smallestValue = values.at(3).as_double();
-            candle.value = values.at(4).as_double();
-            candle.volume = values.at(5).as_double();
-            candle.startPoint = parseDateTime(values.at(6).as_string());
-            candle.endPoint = parseDateTime(values.at(6).as_string());
-
-            candlesVector.push_back(candle);
-        }
-
-        Logger::log<Logger::LogLevel::Debug>(
-            "Парсинг данных выполнился успешно."
-        );
-
-        return candlesVector;
-    }
-
-protected:
-    [[nodiscard]] ExchangeDataFetcher::TimePoint parseDateTime(std::string_view s) const {
-        std::tm tm{};
-        std::istringstream ss{std::string{s}};
-
-        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-
-        if (ss.fail()) {
-            throw std::runtime_error("Failed to parse datetime: " + std::string{s});
-        }
-
-        const std::time_t time = std::mktime(&tm);
-
-        if (time == -1) {
-            throw std::runtime_error("Invalid date/time");
-        }
-
-        return std::chrono::system_clock::from_time_t(time);
-    }
-
-protected:
-    int _moexCandleColumnCount = 8;
-};
-
+import MOEXResponseParser;
 
 class MOEXDataFetcher : public IExchangeDataFetcher {
 public:
@@ -112,7 +27,7 @@ public:
                              std::shared_ptr<ConfigurationParser> configurationParser = nullptr) : IExchangeDataFetcher(
             std::make_shared<ConfigurationParser>(filePath)),
         _httpClient(std::make_shared<BoostBeastHttpClient>("MOEXDataFetcher")),
-        _moexResponseParser(std::make_shared<MoexResponseParser>()) {
+        _moexResponseParser(std::make_shared<MOEXResponseParser>()) {
     }
 
     ~MOEXDataFetcher() override = default;
@@ -213,5 +128,5 @@ protected:
 
 protected:
     std::shared_ptr<IHttpClient> _httpClient;
-    std::shared_ptr<MoexResponseParser> _moexResponseParser;
+    std::shared_ptr<MOEXResponseParser> _moexResponseParser;
 };

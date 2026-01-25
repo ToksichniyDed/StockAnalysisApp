@@ -1,0 +1,9 @@
+{
+  "candles": {
+    "columns": ["open", "close", "high", "low"],
+    "data": []
+  },
+  "data": [
+    [100.0, 101.0, 102.0, 99.0]
+  ]
+}

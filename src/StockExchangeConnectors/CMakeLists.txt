@@ -1,9 +1,10 @@
 add_library(StockExchangeConnectors STATIC)
 
-target_sources(StockExchangeConnectors PRIVATE FILE_SET CXX_MODULES FILES
+target_sources(StockExchangeConnectors PUBLIC FILE_SET CXX_MODULES FILES
         StockDataConfigurations/ConfigurationParser.ixx
         IExchangeDataFetcher.ixx
         MOEXDataFetcher.ixx
+        MOEXResponseParser.ixx
 )
 
 find_package(OpenSSL REQUIRED)
