@@ -1,0 +1,17 @@
+string_value = "test string"
+empty_string = ""
+path_string = "/path/to/resource"
+url_string = "https://example.com/api?param=value"
+
+int_value = 42
+negative_int = -100
+zero = 0
+large_int = 1000000
+
+float_value = 3.14159
+negative_float = -123.456
+scientific = 1.23e-4
+zero_float = 0.0
+
+bool_true = true
+bool_false = false

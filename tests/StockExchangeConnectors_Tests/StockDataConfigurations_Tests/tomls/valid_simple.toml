@@ -1,0 +1,5 @@
+host = "iss.moex.com"
+port = 443
+timeout = 30
+enabled = true
+rate_limit = 10.5

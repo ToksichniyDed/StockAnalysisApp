@@ -1,0 +1,18 @@
+[network]
+host = "example.com"
+port = 8080
+
+[network.ssl]
+enabled = true
+cert_path = "/path/to/cert"
+
+[database]
+[database.connection]
+host = "localhost"
+port = 5432
+username = "admin"
+
+[database.pool]
+max_size = 10
+min_size = 2
+timeout = 30.5

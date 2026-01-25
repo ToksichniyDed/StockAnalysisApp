@@ -1,0 +1,25 @@
+[network]
+host = "iss.moex.com"
+service = "443"
+timeout = 30
+max_retries = 3
+
+[network.ssl]
+verify = true
+cert_path = ""
+
+[requests]
+candles = "/iss/engines/stock/markets/shares/boards/TQBR/securities/{ticker}/candles.json"
+securities = "/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
+history = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/{ticker}.json"
+
+[api]
+rate_limit = 10
+retry_count = 3
+retry_delay = 1.5
+max_candles_per_request = 1000
+
+[cache]
+enabled = false
+ttl = 3600
+max_size = 1000
