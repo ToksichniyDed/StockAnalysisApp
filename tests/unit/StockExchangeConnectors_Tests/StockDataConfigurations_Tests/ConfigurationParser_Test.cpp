@@ -13,7 +13,7 @@ protected:
     std::filesystem::path _fixturesDir;
 
     void SetUp() override {
-        _fixturesDir = std::filesystem::path(__FILE__).parent_path() / "tomls";
+        _fixturesDir = std::filesystem::path(__FILE__).parent_path() / "tomls_test";
 
         ASSERT_TRUE(std::filesystem::exists(_fixturesDir))
             << "Fixtures directory not found: " << _fixturesDir;

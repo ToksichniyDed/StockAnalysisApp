@@ -15,7 +15,7 @@ import IExchangeDataFetcher;
 class MOEXResponseParser_Test : public ::testing::Test {
 protected:
     void SetUp() override {
-        _fixturesDir = std::filesystem::path(__FILE__).parent_path()/"moex_responses";
+        _fixturesDir = std::filesystem::path(__FILE__).parent_path()/"moex_responses_test";
 
         ASSERT_TRUE(std::filesystem::exists(_fixturesDir))
             << "Fixtures directory not found: " << _fixturesDir;
