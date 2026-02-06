@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 add_library(Logger)
 target_sources(Logger PUBLIC FILE_SET CXX_MODULES FILES Logger.ixx)
 target_link_libraries(Logger PRIVATE spdlog::spdlog)
+target_compile_definitions(Logger PUBLIC _WIN32_WINNT=0x0A00)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
         Qt6::Core
@@ -33,7 +34,7 @@ if(WIN32)
             VERBATIM
     )
 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0A00)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC _WIN32_WINNT=0x0A00)
 endif ()
 
 if(MSVC)

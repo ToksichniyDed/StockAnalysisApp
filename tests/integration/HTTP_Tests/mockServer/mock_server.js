@@ -168,7 +168,7 @@ app.get('/health', (req, res) => {
 
 // Запуск сервера
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '::', () => {
     console.log(`Mock HTTP server listening on port ${PORT}`);
     console.log('Available endpoints:');
     console.log('  GET /success - 200 OK with JSON');

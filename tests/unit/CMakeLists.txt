@@ -2,10 +2,6 @@ add_executable(unit_tests Logger_Test.cpp)
 
 add_subdirectory(StockExchangeConnectors_Tests)
 
-set_target_properties(unit_tests PROPERTIES
-        LABELS "unit"
-)
-
 target_link_libraries(unit_tests PRIVATE
         GTest::gtest
         GTest::gtest_main
@@ -16,4 +12,5 @@ target_link_libraries(unit_tests PRIVATE
         NetworkTools
 )
 
-gtest_discover_tests(unit_tests)
+gtest_discover_tests(unit_tests PROPERTIES
+        LABELS "unit")

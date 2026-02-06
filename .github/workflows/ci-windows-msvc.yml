@@ -12,43 +12,44 @@ jobs:
         shell: pwsh
 
     steps:
-      # Выкачиваем код
+      # Настройка окружения
+      # Загрузка кода и кэширование
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # важно для правильного merge-base в PR
+          fetch-depth: 0
 
-      # Кэш conan
       - name: Cache Conan packages
         uses: actions/cache@v4
         with:
           path: ~\.conan2
-          key: conan2-windows-msvc-${{ hashFiles('conanfile.txt', 'extern/**') }}-v8
+          key: conan2-windows-msvc-${{ hashFiles('conanfile.txt', 'extern/**') }}-v9
           restore-keys: |
             conan2-windows-msvc-
+          save-always: true
 
-      # Установка LLVM
-      - name: Install clang-format
-        if: github.event_name == 'pull_request'   # только в PR
+      # Установка инструментов сборки
+      - name: Install Ninja
         run: |
-          choco install llvm --version=19.1.7 -y --force --no-progress
-          refreshenv   # обновляем PATH
-          clang-format --version
+          choco install ninja -y --no-progress
+          ninja --version
 
-      # Ставим Python
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # Установка Python и Conan
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
-      # Устанавливаем Conan через pip
       - name: Install Conan 2.x
         run: |
           python -m pip install --upgrade pip
           pip install conan
           conan --version
 
-      # Установка профилей conan
+      # Развёртывание профилей Conan
       - name: Deploy conan profiles
         run: |
           cd extern
@@ -58,19 +59,111 @@ jobs:
       - name: Install dependencies
         run: |
           cd extern
-          python ./conan_msvc_script.py   
+          python ./conan_msvc_script.py
 
-      # Сборка проекта
+      # Конфигурация CMake
       - name: Configure CMake
         run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -B cmake-build-release-visual-studio
-          
+          cmake -DCMAKE_BUILD_TYPE=Release -B cmake-build-release-visual-studio -G Ninja
 
+      # Сборка проекта
       - name: Build project
         run: |
           cmake --build .\cmake-build-release-visual-studio\
 
-      # Автотесты
+      # Юнит-тесты
       - name: Unit tests
         run: |
-          ctest --test-dir .\cmake-build-release-visual-studio\tests
+          ctest --test-dir .\cmake-build-release-visual-studio\tests --label-regex "unit"
+
+      # Интеграционные тесты
+      - name: Start Mock Http Server
+        run: |
+          Set-Location -Path tests\integration\HTTP_Tests\mockServer
+          npm install
+
+          # Запускаем через cmd /c start чтобы процесс был независим от шага
+          $logOut = "$env:RUNNER_TEMP\mock_server_stdout.log"
+          $logErr = "$env:RUNNER_TEMP\mock_server_stderr.log"
+
+          # Создаём .bat который запускает node и пишет логи
+          $bat = "$env:RUNNER_TEMP\start_mock.bat"
+          $workDir = (Resolve-Path ".\").Path
+          @"
+          @echo off
+          cd /d "$workDir"
+          node mock_server.js > "$logOut" 2> "$logErr"
+          "@ | Out-File -FilePath $bat -Encoding ascii
+
+          # Запускаем через планировщик Windows — процесс живёт независимо от runner'а
+          $action  = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$bat`""
+          $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(1)
+          $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 30)
+          Register-ScheduledTask -TaskName "MockServer" -Action $action -Trigger $trigger -Settings $settings -RunLevel Highest -Force
+          Start-ScheduledTask -TaskName "MockServer"
+
+          Start-Sleep -Seconds 3
+
+          # Ждём готовности
+          $maxRetries = 20
+          $retryCount = 0
+          $serverReady = $false
+
+          while (-not $serverReady -and $retryCount -lt $maxRetries) {
+              try {
+                  $response = Invoke-WebRequest `
+                      -Uri "http://localhost:8080/health" `
+                      -Method GET `
+                      -UseBasicParsing `
+                      -TimeoutSec 5 `
+                      -ErrorAction Stop
+
+                  if ($response.StatusCode -eq 200) {
+                      Write-Host "✓ Mock server is ready!" -ForegroundColor Green
+                      $serverReady = $true
+                  }
+              } catch {
+                  $retryCount++
+                  Write-Host "Waiting... ($retryCount/$maxRetries)" -ForegroundColor Yellow
+                  Start-Sleep -Seconds 2
+              }
+          }
+
+          if (-not $serverReady) {
+              Write-Host "❌ Mock server failed to start!" -ForegroundColor Red
+              Get-Content $logOut -ErrorAction SilentlyContinue
+              Get-Content $logErr -ErrorAction SilentlyContinue
+              exit 1
+          }
+
+          Write-Host "Port 8080 state" -ForegroundColor Cyan
+          netstat -ano | Select-String ":8080"
+          Write-Host "Server stdout" -ForegroundColor Cyan
+          Get-Content $logOut -ErrorAction SilentlyContinue
+
+      - name: Run Integration Tests
+        run: |
+          Write-Host "Server alive check" -ForegroundColor Cyan
+          netstat -ano | Select-String ":8080"
+          curl.exe --max-time 5 http://127.0.0.1:8080/health
+
+          ctest --test-dir .\cmake-build-release-visual-studio\tests `
+                --label-regex "integration_http_test" `
+                --output-on-failure `
+                --verbose
+
+          Write-Host "Integration tests completed" -ForegroundColor Green
+
+      - name: Stop Mock Http Server
+        if: always()
+        run: |
+          Write-Host "Stopping mock server..." -ForegroundColor Yellow
+
+          Unregister-ScheduledTask -TaskName "MockServer" -Confirm:$false -ErrorAction SilentlyContinue
+
+          Get-Process -Name "node" -ErrorAction SilentlyContinue | Stop-Process -Force
+          Write-Host "✓ Server stopped" -ForegroundColor Green
+
+          Write-Host "Final server logs" -ForegroundColor Cyan
+          Get-Content "$env:RUNNER_TEMP\mock_server_stdout.log" -ErrorAction SilentlyContinue
+          Get-Content "$env:RUNNER_TEMP\mock_server_stderr.log" -ErrorAction SilentlyContinue
