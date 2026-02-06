@@ -16,7 +16,7 @@ export module MOEXDataFetcher;
 import ConfigurationParser;
 import IExchangeDataFetcher;
 import IHttpClient;
-import BoostBeastHttpClient;
+import HttpClientFactory;
 import Logger;
 import MOEXResponseParser;
 
@@ -26,7 +26,7 @@ public:
                              std::shared_ptr<IHttpClient> httpClient = nullptr,
                              std::shared_ptr<ConfigurationParser> configurationParser = nullptr) : IExchangeDataFetcher(
             std::make_shared<ConfigurationParser>(filePath)),
-        _httpClient(std::make_shared<BoostBeastHttpClient>("MOEXDataFetcher")),
+        _httpClient(HttpClientFactory::instance().create("default")),
         _moexResponseParser(std::make_shared<MOEXResponseParser>()) {
     }
 

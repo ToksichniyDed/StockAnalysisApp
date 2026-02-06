@@ -1,4 +1,6 @@
-add_executable(Http_Tests
+add_executable(Http_Tests)
+
+target_sources(Http_Tests PRIVATE
         BoostBeastHttpClient_Test.cpp
 )
 
@@ -9,9 +11,14 @@ target_link_libraries(Http_Tests
         NetworkTools
 )
 
-set_target_properties(Http_Tests
-        PROPERTIES
-        LABELS "integration"
+add_test(
+        NAME HttpIntegrationTests
+        COMMAND Http_Tests
+)
+
+set_tests_properties(HttpIntegrationTests PROPERTIES
+        LABELS "integration_http_test"
+        TIMEOUT 300
 )
 
 # Не запускаем автоматически - требует Docker
@@ -19,12 +26,14 @@ set_target_properties(Http_Tests
 
 # Добавляем custom target для запуска с Docker
 add_custom_target(run_http_integration_tests
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}
-        docker-compose up -d
-        COMMAND ${CMAKE_COMMAND} -E sleep 5
+        COMMAND ${CMAKE_COMMAND} -E echo "Starting mock HTTP server..."
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/mock-server
+        docker compose up -d
+        COMMAND ${CMAKE_COMMAND} -E sleep 10
+        COMMAND ${CMAKE_COMMAND} -E echo "Running tests..."
         COMMAND $<TARGET_FILE:Http_Tests>
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}
-        docker-compose down
+        COMMAND ${CMAKE_COMMAND} -E echo "Stopping server..."
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/mock-server
+        docker compose down -v
         DEPENDS Http_Tests
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
