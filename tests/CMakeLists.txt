@@ -1,19 +1,9 @@
+cmake_minimum_required(VERSION 4.0)
 find_package(GTest REQUIRED)
 include(GoogleTest)
 enable_testing()
 
-add_executable(unit_tests
-Logger_Test.cpp)
+add_subdirectory(unit)
+add_subdirectory(integration)
 
-add_subdirectory(StockExchangeConnectors_Tests)
-
-target_link_libraries(GTest::GTest INTERFACE gtest_main)
-target_link_libraries(unit_tests PRIVATE
-        GTest::gtest
-        GTest::gtest_main
-        GTest::gmock
-        spdlog::spdlog
-        StockExchangeConnectors
-        Logger)
-
-gtest_discover_tests(unit_tests)
+add_compile_definitions(BOOST_ASIO_ADL_WORKAROUND_NEEDED)
