@@ -19,6 +19,7 @@ export module BoostBeastHttpClient;
 import IHttpClient;
 import Logger;
 import UrlParser;
+import HttpClientFactory;
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -29,12 +30,14 @@ export class BoostBeastHttpClient : public IHttpClient {
 public:
     explicit BoostBeastHttpClient(
         const std::chrono::milliseconds timeout = std::chrono::seconds{30},
-        const std::string& userAgent = "") 
-        : _timeout(timeout), _userAgent(userAgent.empty() ? "BoostBeastHttpClient" : userAgent) {
+        const std::string& userAgent = "") : _timeout(timeout),
+                                             _userAgent(userAgent.empty() ? "BoostBeastHttpClient" : userAgent) {
     }
 
-    explicit BoostBeastHttpClient(const std::string& userAgent = "") 
-        : _timeout(std::chrono::seconds{30}), _userAgent(userAgent.empty() ? "BoostBeastHttpClient" : userAgent) {
+    explicit BoostBeastHttpClient(const std::string& userAgent = "") : _timeout(std::chrono::seconds{30}),
+                                                                       _userAgent(userAgent.empty()
+                                                                           ? "BoostBeastHttpClient"
+                                                                           : userAgent) {
     }
 
     ~BoostBeastHttpClient() override = default;
@@ -91,20 +94,20 @@ private:
         net::io_context ioc;
         tcp::resolver resolver;
         beast::tcp_stream stream;
-        net::steady_timer timer;
         http::request<http::empty_body> request;
         http::response<http::string_body> response;
         beast::flat_buffer buffer;
         beast::error_code finalEc;
-        bool timedOut = false;
 
-        RequestSession(std::chrono::milliseconds timeout)
-            : resolver(ioc), stream(ioc), timer(ioc, timeout) {}
+        RequestSession() : resolver(ioc), stream(ioc) {
+        }
     };
 
     [[nodiscard]] std::expected<Http::Response, Http::Error>
     performHttpRequest(const Http::ParsedUrl& url) const {
-        auto session = std::make_shared<RequestSession>(_timeout);
+        auto session = std::make_shared<RequestSession>();
+
+        beast::get_lowest_layer(session->stream).expires_after(_timeout);
 
         // Запускаем async-цепочку
         resolveAsync(session, url);
@@ -113,14 +116,15 @@ private:
         session->ioc.run();
 
         // Обрабатываем результат после run()
-        if (session->timedOut) {
-            return std::unexpected(Http::Error{
-                Http::ErrorType::Timeout,
-                std::format("Request timed out after {}ms", _timeout.count())
-            });
-        }
-
         if (session->finalEc) {
+            // Проверяем, это timeout или другая ошибка
+            if (session->finalEc == beast::error::timeout) {
+                return std::unexpected(Http::Error{
+                    Http::ErrorType::Timeout,
+                    std::format("Request timed out after {}ms", _timeout.count())
+                });
+            }
+
             return std::unexpected(Http::Error{
                 Http::ErrorType::NetworkError,
                 std::format("Request failed: {}", session->finalEc.message())
@@ -157,37 +161,30 @@ private:
     // Каждый шаг запускает следующий через completion handler
 
     void resolveAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url) const {
-        startTimer(session);
-
         session->resolver.async_resolve(url.host, url.port,
-            [this, session, &url](const beast::error_code& ec, const tcp::resolver::results_type& results) {
-                if (session->timedOut) return;
+                                        [this, session, &url](const beast::error_code& ec,
+                                                              const tcp::resolver::results_type& results) {
+                                            if (ec) {
+                                                session->finalEc = ec;
+                                                return;
+                                            }
 
-                if (ec) {
-                    session->finalEc = ec;
-                    session->timer.cancel();
-                    return;
-                }
-
-                connectAsync(session, url, results);
-            }
+                                            connectAsync(session, url, results);
+                                        }
         );
     }
 
     void connectAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url,
                       const tcp::resolver::results_type& results) const {
         session->stream.async_connect(results,
-            [this, session, &url](const beast::error_code& ec, const tcp::endpoint&) {
-                if (session->timedOut) return;
+                                      [this, session, &url](const beast::error_code& ec, const tcp::endpoint&) {
+                                          if (ec) {
+                                              session->finalEc = ec;
+                                              return;
+                                          }
 
-                if (ec) {
-                    session->finalEc = ec;
-                    session->timer.cancel();
-                    return;
-                }
-
-                writeAsync(session, url);
-            }
+                                          writeAsync(session, url);
+                                      }
         );
     }
 
@@ -199,45 +196,24 @@ private:
         session->request.set(http::field::user_agent, _userAgent);
 
         http::async_write(session->stream, session->request,
-            [this, session](const beast::error_code& ec, size_t) {
-                if (session->timedOut) return;
+                          [this, session](const beast::error_code& ec, size_t) {
+                              if (ec) {
+                                  session->finalEc = ec;
+                                  return;
+                              }
 
-                if (ec) {
-                    session->finalEc = ec;
-                    session->timer.cancel();
-                    return;
-                }
-
-                readAsync(session);
-            }
+                              readAsync(session);
+                          }
         );
     }
 
     void readAsync(const std::shared_ptr<RequestSession>& session) const {
         http::async_read(session->stream, session->buffer, session->response,
-            [session](const beast::error_code& ec, size_t) {
-                session->timer.cancel(); // Отменяем таймер — ответ получен
-
-                if (session->timedOut) return;
-
-                if (ec) {
-                    session->finalEc = ec;
-                }
-                // Цепочка завершена, ioc.run() выйдет
-            }
-        );
-    }
-
-    // Таймер — один на всю цепочку. При срабатывании отменяет stream.
-    void startTimer(const std::shared_ptr<RequestSession>& session) const {
-        session->timer.async_wait(
-            [session](const beast::error_code& ec) {
-                if (ec) return; // Таймер был отменён — нормально
-
-                // Таймер срабатывает — прерываем stream
-                session->timedOut = true;
-                session->stream.cancel();
-            }
+                         [session](const beast::error_code& ec, size_t) {
+                             if (ec) {
+                                 session->finalEc = ec;
+                             }
+                         }
         );
     }
 
