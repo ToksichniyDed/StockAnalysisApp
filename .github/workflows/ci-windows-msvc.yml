@@ -130,7 +130,7 @@ jobs:
           }
 
           if (-not $serverReady) {
-              Write-Host "❌ Mock server failed to start!" -ForegroundColor Red
+              Write-Host "Mock server failed to start!" -ForegroundColor Red
               Get-Content $logOut -ErrorAction SilentlyContinue
               Get-Content $logErr -ErrorAction SilentlyContinue
               exit 1

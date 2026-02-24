@@ -1,6 +1,7 @@
 set(APP_MAIN_WINDOW_SOURCES
         appmainwindow.cpp
         appmainwindow.h
+        AppTheme.h
 )
 
 set(APP_MAIN_WINDOW_UI
