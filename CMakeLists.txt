@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 4.2.0)
 
-# Путь к Conan extern (относительный от корня проекта, для SomeShit/c++)
+# Путь к Conan extern
 set(CONAN_EXTERN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern")
 
 set(POSSIBLE_TOOLCHAIN_PATHS

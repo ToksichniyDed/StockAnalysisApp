@@ -19,12 +19,13 @@ import IHttpClient;
 import HttpClientFactory;
 import Logger;
 import MOEXResponseParser;
+import Market;
 
-class MOEXDataFetcher : public IExchangeDataFetcher {
+class MOEXDataFetcher : public Exchange::IDataFetcher {
 public:
     explicit MOEXDataFetcher(const std::filesystem::path& filePath = {},
                              std::shared_ptr<IHttpClient> httpClient = nullptr,
-                             std::shared_ptr<ConfigurationParser> configurationParser = nullptr) : IExchangeDataFetcher(
+                             std::shared_ptr<ConfigurationParser> configurationParser = nullptr) : IDataFetcher(
             std::make_shared<ConfigurationParser>(filePath)),
         _httpClient(HttpClientFactory::instance().create("default")),
         _moexResponseParser(std::make_shared<MOEXResponseParser>()) {
@@ -33,31 +34,31 @@ public:
     ~MOEXDataFetcher() override = default;
 
 protected:
-    [[nodiscard]] std::expected<std::vector<ExchangeDataFetcher::BaseCandle>, ExchangeDataFetcher::FetchError>
+    [[nodiscard]] std::expected<std::vector<Market::Candle>, Exchange::FetchError>
     fetchCandles(
-        const Ticker& ticker, const ExchangeDataFetcher::TimePoint& from,
-        const ExchangeDataFetcher::TimePoint& till,
-        const ExchangeDataFetcher::Timeframe& timeframe = ExchangeDataFetcher::Timeframe::Day) const override {
+        const Market::Ticker& ticker, const Market::TimePoint& from,
+        const Market::TimePoint& till,
+        const Market::Timeframe& timeframe = Market::Timeframe::Day) const override {
         auto hostOpt = _configurationParser->getValue<std::string>("network.host");
         if (!hostOpt.has_value() || hostOpt->empty()) {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::InvalidParameter,
+            return std::unexpected(Exchange::FetchError{
+                Exchange::FetchStatus::InvalidParameter,
                 "Host not configured or empty"
             });
         }
 
         auto serviceOpt = _configurationParser->getValue<std::string>("network.service");
         if (!serviceOpt.has_value() || serviceOpt->empty()) {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::InvalidParameter,
+            return std::unexpected(Exchange::FetchError{
+                Exchange::FetchStatus::InvalidParameter,
                 "Service not configured or empty"
             });
         }
 
         auto candlesOpt = _configurationParser->getValue<std::string>("requests.candles");
         if (!candlesOpt.has_value() || candlesOpt->empty()) {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::InvalidParameter,
+            return std::unexpected(Exchange::FetchError{
+                Exchange::FetchStatus::InvalidParameter,
                 "Candles path not configured or empty"
             });
         }
@@ -67,8 +68,8 @@ protected:
         if (pos != std::string::npos) {
             target.replace(pos, 8, ticker.name());
         } else {
-            return std::unexpected(ExchangeDataFetcher::FetchError{
-                ExchangeDataFetcher::FetchStatus::InvalidParameter,
+            return std::unexpected(Exchange::FetchError{
+                Exchange::FetchStatus::InvalidParameter,
                 "Candles template missing {ticker} placeholder"
             });
         }
@@ -76,7 +77,7 @@ protected:
         target += std::format("?from={:%Y-%m-%d}&till={:%Y-%m-%d}&interval={}", from, till,
                               static_cast<int>(timeframe));
 
-        std::vector<ExchangeDataFetcher::BaseCandle> allCandles;
+        std::vector<Market::Candle> allCandles;
         int start = 0;
 
         do {
@@ -87,8 +88,8 @@ protected:
             std::expected<Http::Response, Http::Error> httpResult = _httpClient->get(url);
 
             if (!httpResult.has_value()) {
-                return std::unexpected(ExchangeDataFetcher::FetchError{
-                    ExchangeDataFetcher::FetchStatus::HttpError,
+                return std::unexpected(Exchange::FetchError{
+                    Exchange::FetchStatus::HttpError,
                     std::format("HTTP error: {}", httpResult.error().message),
                     httpResult.error().statusCode.value()
                 });
@@ -96,8 +97,8 @@ protected:
 
             const auto& parsedResponse = _moexResponseParser->parse(httpResult.value().body);
             if (!parsedResponse.has_value()) {
-                return std::unexpected(ExchangeDataFetcher::FetchError{
-                    ExchangeDataFetcher::FetchStatus::ParseError,
+                return std::unexpected(Exchange::FetchError{
+                    Exchange::FetchStatus::ParseError,
                     std::format("Parsing error: {}", parsedResponse.error().errorMessage),
                     parsedResponse.error().httpStatusCode.value()
                 });
@@ -105,8 +106,8 @@ protected:
 
             if (parsedResponse.value().empty()) {
                 if (start == 0) {
-                    return std::unexpected(ExchangeDataFetcher::FetchError{
-                        ExchangeDataFetcher::FetchStatus::NoDataFound,
+                    return std::unexpected(Exchange::FetchError{
+                        Exchange::FetchStatus::NoDataFound,
                         std::string("There is no candle data for the specified period")
                     });
                 }

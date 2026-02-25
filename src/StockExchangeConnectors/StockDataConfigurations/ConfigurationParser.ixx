@@ -14,7 +14,12 @@ import Logger;
 
 namespace Parser {
     template <typename T>
-    concept configValue = std::is_arithmetic_v<T> || std::same_as<T, std::string> || std::same_as<T, bool>;
+    concept configValue = requires(T value) {
+        requires std::is_arithmetic_v<T> ||
+                 std::same_as<T, std::string> ||
+                 std::same_as<T, std::string_view> ||
+                 std::same_as<T, bool>;
+    };
 
     export enum class ExchangeConfigurationError {
         KeyNotFound,

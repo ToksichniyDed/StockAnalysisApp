@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 add_subdirectory(AppMainWindow)
 add_subdirectory(StockExchangeConnectors)
 add_subdirectory(NetworkTools)
+add_subdirectory(Market)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
