@@ -17,7 +17,7 @@ export module MOEXResponseParser;
 
 import IExchangeDataFetcher;
 import Logger;
-import  Market;
+import Market;
 
 export class MOEXResponseParser {
 public:
@@ -59,8 +59,7 @@ public:
             });
         }
 
-        const auto& candles = response.at("candles").as_object();
-        const auto& data = response.at("data").as_array();
+        const auto& data = response.at("candles").as_object().at("data").as_array();
 
         if (data.empty()) {
             return std::unexpected(Exchange::FetchError{
@@ -70,7 +69,7 @@ public:
         }
 
         std::vector<Market::Candle> candlesVector;
-        candlesVector.reserve(candles.size());
+        candlesVector.reserve(data.size());
 
         for (const auto& row : data) {
             const auto& values = row.as_array();
@@ -91,7 +90,7 @@ public:
                         "Invalid type for 'open'"
                     });
                 }
-                candle.openValue = values[0].is_double()
+                candle.openPrice = values[0].is_double()
                                    ? values[0].as_double()
                                    : static_cast<double>(values[0].as_int64());
 
@@ -101,7 +100,7 @@ public:
                         "Invalid type for 'close'"
                     });
                 }
-                candle.closeValue = values[1].is_double()
+                candle.closePrice = values[1].is_double()
                                     ? values[1].as_double()
                                     : static_cast<double>(values[1].as_int64());
 
@@ -111,7 +110,7 @@ public:
                         "Invalid type for 'high'"
                     });
                 }
-                candle.highValue = values[2].is_double()
+                candle.highPrice = values[2].is_double()
                                    ? values[2].as_double()
                                    : static_cast<double>(values[2].as_int64());
 
@@ -121,7 +120,7 @@ public:
                         "Invalid type for 'low'"
                     });
                 }
-                candle.smallestValue = values[3].is_double()
+                candle.lowPrice = values[3].is_double()
                                        ? values[3].as_double()
                                        : static_cast<double>(values[3].as_int64());
 

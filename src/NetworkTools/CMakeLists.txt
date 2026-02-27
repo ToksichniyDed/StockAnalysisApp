@@ -15,3 +15,8 @@ target_sources(NetworkTools PRIVATE
 )
 
 target_link_libraries(NetworkTools PUBLIC Boost::headers OpenSSL::SSL OpenSSL::Crypto Logger)
+
+target_include_directories(NetworkTools
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)

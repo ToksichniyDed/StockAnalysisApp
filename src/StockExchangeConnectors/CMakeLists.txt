@@ -12,3 +12,8 @@ find_package(Boost REQUIRED COMPONENTS json beast)
 find_package(tomlplusplus REQUIRED)
 
 target_link_libraries(StockExchangeConnectors PRIVATE Boost::json Boost::headers tomlplusplus::tomlplusplus Logger NetworkTools Market)
+
+target_include_directories(StockExchangeConnectors
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
