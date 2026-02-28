@@ -1,21 +1,23 @@
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Charts)
+
+qt_standard_project_setup()
+
+add_subdirectory(InstrumentTab)
+
 set(APP_MAIN_WINDOW_SOURCES
-        appmainwindow.cpp
-        appmainwindow.h
-        AppTheme.h
+        AppMainWindow.cpp
+        InstrumentTabBar.cpp
 )
 
-set(APP_MAIN_WINDOW_UI
-        AppMainWindow.ui
+set(APP_MAIN_WINDOW_HEADERS
+        AppMainWindow.h
+        InstrumentTabBar.h
 )
 
 add_library(AppMainWindow STATIC
         ${APP_MAIN_WINDOW_SOURCES}
-        ${APP_MAIN_WINDOW_UI}
+        ${APP_MAIN_WINDOW_HEADERS}
 )
-
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Charts)
-
-qt_standard_project_setup()
 
 target_include_directories(AppMainWindow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -23,7 +25,22 @@ target_link_libraries(AppMainWindow PRIVATE
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets
-        Qt6::Charts
         StockExchangeConnectors
+        AppTheme
+        PUBLIC
+        InstrumentTab
+        Market
+)
+
+target_include_directories(AppMainWindow
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_library(AppTheme STATIC AppTheme.h)
+
+target_include_directories(AppTheme
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

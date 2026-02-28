@@ -7,24 +7,28 @@
 
 #include <QMainWindow>
 
+#include <InstrumentTabBar.h>
+#include <InstrumentDockSet.h>
 
-QT_BEGIN_NAMESPACE
-
-namespace Ui {
-    class AppMainWindow;
-}
-
-QT_END_NAMESPACE
-
-class AppMainWindow : public QMainWindow {
+class AppMainWindow final : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit AppMainWindow(QWidget* parent = nullptr);
     ~AppMainWindow() override;
 
+private slots:
+    void slot_AddInstrumentTab(const QString& ticker);
+    void slot_InstrumentTabClicked(int index);
+    void slot_InstrumentTabCloseRequested(int index);
+
 private:
-    Ui::AppMainWindow* ui;
+    void setupUi();
+
+private:
+    InstrumentTabBar* _instrumentTabBar = nullptr;
+    QList<InstrumentDockSet*> _dockSets;
+    int _activeIndex = -1;
 };
 
 
