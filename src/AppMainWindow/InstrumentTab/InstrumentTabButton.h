@@ -31,10 +31,10 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
-    void recalcWidth() noexcept;
 
 private:
     [[nodiscard]] QRect closeButtonRect() const noexcept;
+    void recalcWidth() noexcept;
 
 private:
     InstrumentContext* _instrumentContext = nullptr;
