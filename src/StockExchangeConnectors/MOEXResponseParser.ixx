@@ -59,7 +59,7 @@ public:
             });
         }
 
-        const auto& data = response.at("candles").as_object().at("data").as_array();
+        const auto& data = response.at("data").as_array();
 
         if (data.empty()) {
             return std::unexpected(Exchange::FetchError{

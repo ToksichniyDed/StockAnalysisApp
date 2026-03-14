@@ -48,10 +48,10 @@ TEST_F(MOEXResponseParser_Test, ParsesValidSingleCandle) {
     ASSERT_EQ(result->size(), 1);
 
     const auto& candle = result->at(0);
-    EXPECT_DOUBLE_EQ(candle.openValue, 250.5);
-    EXPECT_DOUBLE_EQ(candle.closeValue, 251.0);
-    EXPECT_DOUBLE_EQ(candle.highValue, 252.0);
-    EXPECT_DOUBLE_EQ(candle.smallestValue, 249.5);
+    EXPECT_DOUBLE_EQ(candle.openPrice, 250.5);
+    EXPECT_DOUBLE_EQ(candle.closePrice, 251.0);
+    EXPECT_DOUBLE_EQ(candle.highPrice, 252.0);
+    EXPECT_DOUBLE_EQ(candle.lowPrice, 249.5);
     EXPECT_TRUE(candle.value.has_value());
     EXPECT_DOUBLE_EQ(candle.value.value(), 1500000.0);
     EXPECT_DOUBLE_EQ(candle.volume, 6000.0);
@@ -64,13 +64,13 @@ TEST_F(MOEXResponseParser_Test, ParsesMultipleCandles) {
     ASSERT_TRUE(result.has_value())<<result.error().errorMessage;;
     EXPECT_EQ(result->size(), 3);
 
-    EXPECT_DOUBLE_EQ(result->at(0).openValue, 100.0);
-    EXPECT_DOUBLE_EQ(result->at(1).openValue, 101.0);
-    EXPECT_DOUBLE_EQ(result->at(2).openValue, 100.5);
+    EXPECT_DOUBLE_EQ(result->at(0).openPrice, 100.0);
+    EXPECT_DOUBLE_EQ(result->at(1).openPrice, 101.0);
+    EXPECT_DOUBLE_EQ(result->at(2).openPrice, 100.5);
 
-    EXPECT_DOUBLE_EQ(result->at(0).closeValue, 101.0);
-    EXPECT_DOUBLE_EQ(result->at(1).closeValue, 100.5);
-    EXPECT_DOUBLE_EQ(result->at(2).closeValue, 102.0);
+    EXPECT_DOUBLE_EQ(result->at(0).closePrice, 101.0);
+    EXPECT_DOUBLE_EQ(result->at(1).closePrice, 100.5);
+    EXPECT_DOUBLE_EQ(result->at(2).closePrice, 102.0);
 }
 
 TEST_F(MOEXResponseParser_Test, ParsesDateTimeCorrectly) {
@@ -113,8 +113,8 @@ TEST_F(MOEXResponseParser_Test, HandlesNegativePrices) {
     auto result = _parser.parse(json);
 
     ASSERT_TRUE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_DOUBLE_EQ(result->at(0).openValue, -100.0);
-    EXPECT_DOUBLE_EQ(result->at(0).closeValue, -99.0);
+    EXPECT_DOUBLE_EQ(result->at(0).openPrice, -100.0);
+    EXPECT_DOUBLE_EQ(result->at(0).closePrice, -99.0);
 }
 
 TEST_F(MOEXResponseParser_Test, RejectsNonObjectJson) {
@@ -122,7 +122,7 @@ TEST_F(MOEXResponseParser_Test, RejectsNonObjectJson) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::ParseError);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::ParseError);
 }
 
 TEST_F(MOEXResponseParser_Test, RejectsMissingCandlesField) {
@@ -130,7 +130,7 @@ TEST_F(MOEXResponseParser_Test, RejectsMissingCandlesField) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::ParseError);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::ParseError);
 }
 
 TEST_F(MOEXResponseParser_Test, RejectsEmptyData) {
@@ -138,7 +138,7 @@ TEST_F(MOEXResponseParser_Test, RejectsEmptyData) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::NoDataFound);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::NoDataFound);
 }
 
 TEST_F(MOEXResponseParser_Test, RejectsInvalidColumnCount) {
@@ -146,7 +146,7 @@ TEST_F(MOEXResponseParser_Test, RejectsInvalidColumnCount) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::InvalidParameter);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::InvalidParameter);
     EXPECT_TRUE(result.error().errorMessage.find("Column count mismatch") != std::string::npos ||
                 result.error().errorMessage.find("mismatch") != std::string::npos);
 }
@@ -156,7 +156,7 @@ TEST_F(MOEXResponseParser_Test, RejectsInvalidDataTypes) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::ParseError);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::ParseError);
 }
 
 TEST_F(MOEXResponseParser_Test, RejectsInvalidDateTime) {
@@ -164,7 +164,7 @@ TEST_F(MOEXResponseParser_Test, RejectsInvalidDateTime) {
     auto result = _parser.parse(json);
 
     ASSERT_FALSE(result.has_value())<<result.error().errorMessage;;
-    EXPECT_EQ(result.error().status, ExchangeDataFetcher::FetchStatus::ParseError);
+    EXPECT_EQ(result.error().status, Exchange::FetchStatus::ParseError);
 }
 
 TEST_F(MOEXResponseParser_Test, ParsesInlineJson) {
@@ -188,8 +188,8 @@ TEST_F(MOEXResponseParser_Test, PreservesDataOrder) {
     ASSERT_EQ(result->size(), 3);
 
     // Проверяем, что порядок сохранен
-    EXPECT_LT(result->at(0).openValue, result->at(1).openValue);
-    EXPECT_GT(result->at(1).openValue, result->at(2).openValue);
+    EXPECT_LT(result->at(0).openPrice, result->at(1).openPrice);
+    EXPECT_GT(result->at(1).openPrice, result->at(2).openPrice);
 }
 
 TEST_F(MOEXResponseParser_Test, ReservesCapacityCorrectly) {
