@@ -31,6 +31,21 @@ public:
     [[nodiscard]] InstrumentContext* context() const noexcept;
     [[nodiscard]] InstrumentSession* session() const noexcept;
 
+    [[nodiscard]] bool priceChartDockVisible() const noexcept;
+    [[nodiscard]] bool cvdChartDockVisible() const noexcept;
+    [[nodiscard]] bool vdChartDockVisible() const noexcept;
+
+signals:
+    void signal_PriceChartDockChangedVisible(bool);
+    void signal_CvdChartDockChangedVisible(bool);
+    void signal_VdChartDockChangedVisible(bool);
+
+public slots:
+    void slot_PriceChartDockVisible(bool visible);
+    void slot_CvdChartDockVisible(bool visible);
+    void slot_VdChartDockVisible(bool visible);
+    void slot_ResetDocksLayout();
+
 private:
     void setupDocks();
     void applyDefaultLayout();

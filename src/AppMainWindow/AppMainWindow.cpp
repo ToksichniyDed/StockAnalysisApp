@@ -5,14 +5,15 @@
 #include <QToolBar>
 
 #include <Market.h>
-#include "AppMainWindow.h"
-#include "AppTheme.h"
+#include <AppMainWindow.h>
+#include <AppTheme.h>
+#include <ActivityBar.h>
 
 AppMainWindow::AppMainWindow(QWidget* parent) : QMainWindow(parent) {
     setupUi();
     setStyleSheet(AppTheme::baseStyleSheet());
     setPalette(AppTheme::buildPalette());
-    resize(1400, 860);
+    setMinimumSize(1400, 860);
 }
 
 AppMainWindow::~AppMainWindow() {
@@ -34,6 +35,8 @@ void AppMainWindow::slot_AddInstrumentTab(const QString& ticker) {
     _instrumentTabBar->addInstrumentTab(newContext);
 
     slot_InstrumentTabClicked(_dockSets.size() - 1);
+
+    _activityBar->setActiveInstrumentDockSet(newDockSet);
 }
 
 void AppMainWindow::slot_InstrumentTabClicked(int index) {
@@ -50,6 +53,7 @@ void AppMainWindow::slot_InstrumentTabClicked(int index) {
     _activeIndex = index;
 
     _instrumentTabBar->setActiveInstrumentTab(index);
+    _activityBar->setActiveInstrumentDockSet(_dockSets.at(_activeIndex));
 }
 
 void AppMainWindow::slot_InstrumentTabCloseRequested(int index) {
@@ -88,7 +92,7 @@ void AppMainWindow::slot_InstrumentTabCloseRequested(int index) {
 }
 
 void AppMainWindow::setupUi() {
-    auto* tabToolBar = new QToolBar(this);
+    auto tabToolBar = new QToolBar(this);
     tabToolBar->setMovable(false);
     tabToolBar->setFloatable(false);
     tabToolBar->setContentsMargins(0, 0, 0, 0);
@@ -102,7 +106,15 @@ void AppMainWindow::setupUi() {
     connect(_instrumentTabBar, &InstrumentTabBar::signal_InstrumentTabClicked, this, &AppMainWindow::slot_InstrumentTabClicked);
     connect(_instrumentTabBar, &InstrumentTabBar::signal_InstrumentTabCloseRequested, this, &AppMainWindow::slot_InstrumentTabCloseRequested);
 
-    // auto centralWidget = new QWidget(this);
-    // setCentralWidget(centralWidget);
     setDockNestingEnabled(true);
+
+    _activityBar = new ActivityBar(this);
+    _activityBar->setActiveInstrumentDockSet(nullptr);
+
+    auto leftBar = new QToolBar(this);
+    leftBar->setMovable(false);
+    leftBar->setFloatable(false);
+    leftBar->setStyleSheet("QToolBar { border: none; padding: 0; spacing: 0; }");
+    leftBar->addWidget(_activityBar);
+    addToolBar(Qt::LeftToolBarArea, leftBar);
 }

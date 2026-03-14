@@ -7,11 +7,13 @@ add_subdirectory(InstrumentTab)
 set(APP_MAIN_WINDOW_SOURCES
         AppMainWindow.cpp
         InstrumentTabBar.cpp
+        ActivityBar.cpp
 )
 
 set(APP_MAIN_WINDOW_HEADERS
         AppMainWindow.h
         InstrumentTabBar.h
+        ActivityBar.h
 )
 
 add_library(AppMainWindow STATIC

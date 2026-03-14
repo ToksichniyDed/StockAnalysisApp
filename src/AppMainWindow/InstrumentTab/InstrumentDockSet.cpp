@@ -23,12 +23,14 @@ void InstrumentDockSet::show() {
         applyDefaultLayout();
         _firstShow = false;
     } else if (!_savedState.isEmpty()) {
-        _mainWindow->restoreState(_savedState);
+        //TODO: восстановление положения доков между сессиями
+        //_mainWindow->restoreState(_savedState);
     }
 }
 
 void InstrumentDockSet::hide() {
-    _savedState = _mainWindow->saveState();
+    //TODO: сохранение положения доков между сессиями
+    //_savedState = _mainWindow->saveState();
     _priceDock->hide();
     _cvdDock->hide();
     _vdDock->hide();
@@ -42,10 +44,46 @@ InstrumentSession* InstrumentDockSet::session() const noexcept {
     return _session;
 }
 
+bool InstrumentDockSet::priceChartDockVisible() const noexcept {
+    return _priceDock->isVisible();
+}
+
+bool InstrumentDockSet::cvdChartDockVisible() const noexcept {
+    return _cvdDock->isVisible();
+}
+
+bool InstrumentDockSet::vdChartDockVisible() const noexcept {
+    return _vdDock->isVisible();
+}
+
+void InstrumentDockSet::slot_PriceChartDockVisible(const bool visible) {
+    QSignalBlocker blocker(_priceDock);
+    _priceDock->setVisible(visible);
+}
+
+void InstrumentDockSet::slot_CvdChartDockVisible(const bool visible) {
+    QSignalBlocker blocker(_cvdDock);
+    _cvdDock->setVisible(visible);
+}
+
+void InstrumentDockSet::slot_VdChartDockVisible(const bool visible) {
+    QSignalBlocker blocker(_vdDock);
+    _vdDock->setVisible(visible);
+}
+
+void InstrumentDockSet::slot_ResetDocksLayout() {
+    applyDefaultLayout();
+}
+
 void InstrumentDockSet::setupDocks() {
     _priceDock = new PriceChartDock(_context, _session, _mainWindow);
     _cvdDock = new CvdChartDock(_context, _session, _mainWindow);
     _vdDock = new VdChartDock(_context, _session, _mainWindow);
+
+    connect(_priceDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_PriceChartDockChangedVisible);
+    connect(_cvdDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_CvdChartDockChangedVisible);
+    connect(_vdDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_VdChartDockChangedVisible);
+
 
     _mainWindow->addDockWidget(Qt::TopDockWidgetArea, _priceDock);
     _mainWindow->addDockWidget(Qt::BottomDockWidgetArea, _cvdDock);
@@ -57,9 +95,28 @@ void InstrumentDockSet::setupDocks() {
 }
 
 void InstrumentDockSet::applyDefaultLayout() {
+    if (_priceDock->isFloating())
+        _priceDock->setFloating(false);
+    if (_cvdDock->isFloating())
+        _cvdDock->setFloating(false);
+    if (_vdDock->isFloating())
+        _vdDock->setFloating(false);
+
+    _priceDock->show();
+    _cvdDock->show();
+    _vdDock->show();
+
+    // пересобираем структуру
+    _mainWindow->addDockWidget(Qt::TopDockWidgetArea, _priceDock);
+    _mainWindow->addDockWidget(Qt::TopDockWidgetArea, _cvdDock);
+    _mainWindow->addDockWidget(Qt::TopDockWidgetArea, _vdDock);
+
+    _mainWindow->splitDockWidget(_priceDock, _cvdDock, Qt::Vertical);
+    _mainWindow->splitDockWidget(_cvdDock, _vdDock, Qt::Horizontal);
+
     _mainWindow->resizeDocks(
-        {_priceDock, _cvdDock, _vdDock},
-        {500, 200, 200},
+        {_priceDock, _cvdDock},
+        {560, 240},
         Qt::Vertical
     );
     _mainWindow->resizeDocks(

@@ -10,6 +10,8 @@
 #include <InstrumentTabBar.h>
 #include <InstrumentDockSet.h>
 
+#include "ActivityBar.h"
+
 class AppMainWindow final : public QMainWindow {
     Q_OBJECT
 
@@ -27,6 +29,7 @@ private:
 
 private:
     InstrumentTabBar* _instrumentTabBar = nullptr;
+    ActivityBar* _activityBar = nullptr;
     QList<InstrumentDockSet*> _dockSets;
     int _activeIndex = -1;
 };

@@ -177,10 +177,6 @@ namespace AppTheme {
                 padding: 2px;
                 border-radius: 3px;
             }
-            QDockWidget::close-button:hover,
-            QDockWidget::float-button:hover {
-                background-color: %5;
-            }
 
             QSplitter::handle {
                 background-color: %4;
