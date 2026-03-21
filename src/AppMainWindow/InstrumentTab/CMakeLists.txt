@@ -7,6 +7,7 @@ set(INSTRUMENT_TAB_SOURCES
         Charts/CvdChartDock.cpp
         Charts/VdChartDock.cpp
         Charts/PriceChartDock.cpp
+        Charts/CandleRenderer.cpp
 )
 
 set(INSTRUMENT_TAB_HEADERS
@@ -18,6 +19,7 @@ set(INSTRUMENT_TAB_HEADERS
         Charts/CvdChartDock.h
         Charts/VdChartDock.h
         Charts/PriceChartDock.h
+        Charts/CandleRenderer.h
 )
 
 add_library(InstrumentTab STATIC

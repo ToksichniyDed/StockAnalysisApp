@@ -10,7 +10,6 @@
 
 #include <InstrumentDockSet.h>
 
-
 class ActivityBar : public QWidget {
 
     Q_OBJECT
@@ -37,8 +36,8 @@ private:
     QToolButton* _vdDockBtn = nullptr;
     QToolButton* _resetBtn = nullptr;
 
-    static constexpr int _buttonSize = 32;
-    static constexpr int _barWidth = 40;
+    static constexpr int BUTTON_SIZE = 32;
+    static constexpr int BAR_WIDTH = 40;
 };
 
 

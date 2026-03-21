@@ -6,7 +6,7 @@
 #include "ActivityBar.h"
 
 ActivityBar::ActivityBar(QWidget* parent) : QWidget(parent) {
-    setFixedWidth(_buttonSize);
+    setFixedWidth(BUTTON_SIZE);
     setStyleSheet(QString("background:%1; border-right:1px solid %2;")
         .arg(AppTheme::BG_PANEL, AppTheme::BORDER));
 
@@ -85,7 +85,7 @@ QToolButton* ActivityBar::createToolButton(const QString& icon, const QString& t
     auto* btn = new QToolButton(this);
     btn->setText(icon);
     btn->setToolTip(tooltip);
-    btn->setFixedSize(_buttonSize, _buttonSize);
+    btn->setFixedSize(BUTTON_SIZE, BUTTON_SIZE);
     btn->setCheckable(true);
     btn->setStyleSheet(QString(R"(
         QToolButton {
