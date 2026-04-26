@@ -11,6 +11,7 @@
 #include "CandleRenderer.h"
 
 #include <InstrumentTab/InstrumentContext.h>
+#include <Logger/Logger.h>
 
 PriceChartWidget::PriceChartWidget(QWidget* parent) : QWidget(parent) {
     setMouseTracking(true);
@@ -19,6 +20,8 @@ PriceChartWidget::PriceChartWidget(QWidget* parent) : QWidget(parent) {
 
 void PriceChartWidget::setCandles(std::vector<Market::Candle>& candles) {
     _candles = std::move(candles);
+
+    Logger::log<Logger::LogLevel::Debug>("Подгружены свечи {} штук !", _candles.size());
 
     _candleWidth = 0.0; // сбрасываем чтобы recalcView пересчитал под новые данные
     _viewOffset = 0;
@@ -122,6 +125,8 @@ void PriceChartWidget::drawGrid(QPainter& painter) const {
             continue;
         painter.drawLine(0, y, rect.width(), y);
     }
+
+    Logger::log<Logger::LogLevel::Debug>("Отрисованна сетка графика!");
 }
 
 void PriceChartWidget::drawAxisY(QPainter& painter) const {
@@ -152,6 +157,8 @@ void PriceChartWidget::drawAxisY(QPainter& painter) const {
             label
         );
     }
+
+    Logger::log<Logger::LogLevel::Debug>("Отрисованна ось Y!");
 }
 
 
@@ -203,6 +210,8 @@ void PriceChartWidget::drawAxisX(QPainter& painter) const {
             label
         );
     }
+
+    Logger::log<Logger::LogLevel::Debug>("Отрисованна ось X!");
 }
 
 QRect PriceChartWidget::chartRect() const noexcept {
@@ -228,6 +237,8 @@ void PriceChartWidget::drawBackground(QPainter& painter) const {
 
     // граница между свечами и осью X
     painter.drawLine(0, chartRect().height(), chartRect().width(), chartRect().height());
+
+    Logger::log<Logger::LogLevel::Debug>("Отрисован задний план!");
 }
 
 void PriceChartWidget::recalculateView() {
@@ -263,6 +274,8 @@ void PriceChartWidget::recalculateView() {
     const double padding = (_priceMax - _priceMin) * 0.05;
     _priceMin -= padding;
     _priceMax += padding;
+
+    Logger::log<Logger::LogLevel::Debug>("Пересчет отображения!");
 }
 
 int PriceChartWidget::visibleCandleCount() const noexcept {
@@ -283,4 +296,8 @@ PriceChartDock::PriceChartDock(InstrumentContext* context, InstrumentSession* se
 
     _priceChartWidget = new PriceChartWidget(this);
     setWidget(_priceChartWidget);
+}
+
+PriceChartWidget* PriceChartDock::widget() {
+    return _priceChartWidget;
 }

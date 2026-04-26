@@ -9,6 +9,8 @@
 #include <qcoreevent.h>
 #include <qevent.h>
 
+#include <Logger/Logger.h>
+
 InstrumentTabBar::InstrumentTabBar(QWidget* parent) : QWidget(parent) {
     setFixedHeight(36);
     setStyleSheet(QString("background:%1; border-bottom:1px solid %2;")
@@ -35,6 +37,8 @@ InstrumentTabBar::InstrumentTabBar(QWidget* parent) : QWidget(parent) {
 
     _tabLayout->addWidget(_addInstrumentTabButton);
     connect(_addInstrumentTabButton, &QToolButton::clicked, this, &InstrumentTabBar::slot_AddInstrumentButtonClicked);
+
+    Logger::log<Logger::LogLevel::Debug>("Создан InstrumentTabBar!");
 }
 
 InstrumentTabBar::~InstrumentTabBar() {
@@ -52,6 +56,8 @@ void InstrumentTabBar::addInstrumentTab(InstrumentContext* instrumentContext) {
 
     _instrumentTabs.append(newBtn);
     _tabLayout->insertWidget(_instrumentTabs.size() - 1, newBtn);
+
+    Logger::log<Logger::LogLevel::Debug>("Добавлен InstrumentTab!");
 }
 
 void InstrumentTabBar::removeInstrumentTab(int index) {
@@ -61,6 +67,8 @@ void InstrumentTabBar::removeInstrumentTab(int index) {
     auto removeBtn = _instrumentTabs.takeAt(index);
     _tabLayout->removeWidget(removeBtn);
     removeBtn->deleteLater();
+
+    Logger::log<Logger::LogLevel::Debug>("Удален InstrumentTab!");
 }
 
 void InstrumentTabBar::setActiveInstrumentTab(const int index) {
@@ -70,6 +78,8 @@ void InstrumentTabBar::setActiveInstrumentTab(const int index) {
     for (int i = 0; i < _instrumentTabs.size(); i++) {
         _instrumentTabs.at(i)->setActive(i == index);
     }
+
+    Logger::log<Logger::LogLevel::Debug>("Смена активного InstrumentTab!");
 }
 
 void InstrumentTabBar::slot_AddInstrumentButtonClicked() {
@@ -97,6 +107,8 @@ void InstrumentTabBar::slot_AddInstrumentButtonClicked() {
 
     const int addBtnIdx = _tabLayout->indexOf(_addInstrumentTabButton);
     _tabLayout->insertWidget(addBtnIdx, _tickerEdit);
+
+    Logger::log<Logger::LogLevel::Debug>("Добавлен InstrumentTabButton!");
 
     _tickerEdit->setFocus();
 

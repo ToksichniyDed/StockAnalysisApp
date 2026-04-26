@@ -33,6 +33,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
     const Market::Timeframe& timeframe) const {
     auto hostOpt = _configurationParser->getValue<std::string>("network.host");
     if (!hostOpt.has_value() || hostOpt->empty()) {
+        Logger::log<Logger::LogLevel::Error>("Пустой network.host!");
+
         return std::unexpected(Exchange::FetchError{
             Exchange::FetchStatus::InvalidParameter,
             "Host not configured or empty"
@@ -41,6 +43,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
     auto serviceOpt = _configurationParser->getValue<std::string>("network.service");
     if (!serviceOpt.has_value() || serviceOpt->empty()) {
+        Logger::log<Logger::LogLevel::Error>("Пустой network.service!");
+
         return std::unexpected(Exchange::FetchError{
             Exchange::FetchStatus::InvalidParameter,
             "Service not configured or empty"
@@ -49,6 +53,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
     auto candlesOpt = _configurationParser->getValue<std::string>("requests.candles");
     if (!candlesOpt.has_value() || candlesOpt->empty()) {
+        Logger::log<Logger::LogLevel::Error>("Пустой requests.candles!");
+
         return std::unexpected(Exchange::FetchError{
             Exchange::FetchStatus::InvalidParameter,
             "Candles path not configured or empty"
@@ -60,6 +66,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
     if (pos != std::string::npos) {
         target.replace(pos, 8, ticker.name());
     } else {
+        Logger::log<Logger::LogLevel::Error>("Пустой ticker!");
+
         return std::unexpected(Exchange::FetchError{
             Exchange::FetchStatus::InvalidParameter,
             "Candles template missing {ticker} placeholder"
@@ -72,6 +80,9 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
     std::vector<Market::Candle> allCandles;
     int start = 0;
 
+    Logger::log<Logger::LogLevel::Debug>("host: '{}', target: '{}'", *hostOpt, target);
+    Logger::log<Logger::LogLevel::Debug>("url: 'http://{}{}&start=0'", *hostOpt, target);
+
     do {
         constexpr int pageSize = 1000;
         std::string url = std::format("https://{}{}&start={}",
@@ -80,6 +91,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
         std::expected<Http::Response, Http::Error> httpResult = _httpClient->get(url);
 
         if (!httpResult.has_value()) {
+            Logger::log<Logger::LogLevel::Error>("httpResult c ошибкой {}!", httpResult.error().message);
+
             return std::unexpected(Exchange::FetchError{
                 Exchange::FetchStatus::HttpError,
                 std::format("HTTP error: {}", httpResult.error().message),
@@ -89,6 +102,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
         const auto& parsedResponse = _moexResponseParser->parse(httpResult.value().body);
         if (!parsedResponse.has_value()) {
+            Logger::log<Logger::LogLevel::Error>("parsedResponse c ошибкой  {}!", parsedResponse.error().errorMessage);
+
             return std::unexpected(Exchange::FetchError{
                 Exchange::FetchStatus::ParseError,
                 std::format("Parsing error: {}", parsedResponse.error().errorMessage),
@@ -98,6 +113,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
         if (parsedResponse.value().empty()) {
             if (start == 0) {
+                Logger::log<Logger::LogLevel::Info>("parsedResponse вернул 0 свечей!");
+
                 return std::unexpected(Exchange::FetchError{
                     Exchange::FetchStatus::NoDataFound,
                     std::string("There is no candle data for the specified period")

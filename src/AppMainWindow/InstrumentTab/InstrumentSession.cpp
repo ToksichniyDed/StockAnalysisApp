@@ -22,12 +22,17 @@ void InstrumentSession::load(const Market::TimePoint from, const Market::TimePoi
         auto result = fetcher->fetchCandles(ticker, from, till, timeframe);
 
         if (!result.has_value()) {
+            Logger::log<Logger::LogLevel::Error>("Запрос свечей по тикету {} закончился с ошибкой {}!", ticker.name(), result.error().errorMessage);
+            signal_LoadError(result.error().errorMessage.data());
             return;
         }
 
+        Logger::log<Logger::LogLevel::Debug>("Запрос свечей по тикету {} закончился успешно!", ticker.name());
         _candles = std::move(result.value());
         emit signal_candlesReady();
     });
+
+    Logger::log<Logger::LogLevel::Debug>("Запрошенны данные по тикету {}!", ticker.name());
 }
 
 void InstrumentSession::reload() {

@@ -32,6 +32,8 @@ ActivityBar::ActivityBar(QWidget* parent) : QWidget(parent) {
     _layout->addWidget(sep);
     _layout->addWidget(_resetBtn);
     _layout->addStretch();
+
+    Logger::log<Logger::LogLevel::Debug>("Добавлен ActivityBar!");
 }
 
 ActivityBar::~ActivityBar() {
@@ -79,6 +81,8 @@ void ActivityBar::setActiveInstrumentDockSet(InstrumentDockSet* instrumentDockSe
             &QToolButton::setChecked);
     connect(_activeInstrumentDockSet, &InstrumentDockSet::signal_VdChartDockChangedVisible, _vdDockBtn,
             &QToolButton::setChecked);
+
+    Logger::log<Logger::LogLevel::Debug>("Смена активного ActivityBar!");
 }
 
 QToolButton* ActivityBar::createToolButton(const QString& icon, const QString& tooltip) {

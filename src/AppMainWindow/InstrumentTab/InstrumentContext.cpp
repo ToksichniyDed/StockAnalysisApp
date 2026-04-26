@@ -4,6 +4,8 @@
 
 #include "InstrumentContext.h"
 
+#include <Logger/Logger.h>
+
 InstrumentContext::InstrumentContext(Market::Ticker ticker, Market::Timeframe timeframe, QObject* parent) : QObject(parent), _ticker(
     std::move(ticker)), _timeframe(timeframe) {
 }
@@ -31,6 +33,8 @@ void InstrumentContext::setTimeframe(const Market::Timeframe& timeframe) noexcep
         return;
     _timeframe = timeframe;
 
+    Logger::log<Logger::LogLevel::Debug>("Установлен таймфрейм!");
+
     emit signal_timeframeChanged(_timeframe);
     emit signal_contextChanged();
 }
@@ -39,6 +43,8 @@ void InstrumentContext::setTicker(const Market::Ticker& ticker) noexcept {
     if (ticker == _ticker)
         return;
     _ticker = ticker;
+
+    Logger::log<Logger::LogLevel::Debug>("Установлен тикер!");
 
     emit signal_tickerChanged(_ticker);
     emit signal_contextChanged();

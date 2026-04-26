@@ -16,12 +16,16 @@ AppMainWindow::AppMainWindow(QWidget* parent) : QMainWindow(parent) {
     setStyleSheet(AppTheme::baseStyleSheet());
     setPalette(AppTheme::buildPalette());
     setMinimumSize(1400, 860);
+
+    Logger::log<Logger::LogLevel::Debug>("Главное окно проинициализировано.");
 }
 
 void AppMainWindow::slot_AddInstrumentTab(const QString& ticker) {
     //проверка на дубликат
     for (const auto* dock : _dockSets) {
         if (dock->context()->tickerName() == ticker) {
+            Logger::log<Logger::LogLevel::Debug>("Тикер {} уже был добавлен!", ticker.toStdString());
+
             slot_InstrumentTabClicked(_dockSets.indexOf(dock));
             return;
         }
@@ -31,6 +35,8 @@ void AppMainWindow::slot_AddInstrumentTab(const QString& ticker) {
     auto newDataFetcher = std::make_shared<MOEXDataFetcher>();
     auto* newDockSet = new InstrumentDockSet(newContext, newDataFetcher,this, this);
     _dockSets.append(newDockSet);
+
+    Logger::log<Logger::LogLevel::Debug>("Тикер {} был добавлен!", ticker.toStdString());
 
     _instrumentTabBar->addInstrumentTab(newContext);
 
@@ -54,6 +60,8 @@ void AppMainWindow::slot_InstrumentTabClicked(int index) {
 
     _instrumentTabBar->setActiveInstrumentTab(index);
     _activityBar->setActiveInstrumentDockSet(_dockSets.at(_activeIndex));
+
+    Logger::log<Logger::LogLevel::Debug>("Смена активного тикера {}", _dockSets.at(_activeIndex)->context()->tickerName().toStdString());
 }
 
 void AppMainWindow::slot_InstrumentTabCloseRequested(int index) {
@@ -71,10 +79,13 @@ void AppMainWindow::slot_InstrumentTabCloseRequested(int index) {
         --_activeIndex;
     }
 
-    auto context = _dockSets.takeAt(index);
-    context->deleteLater();
+    auto dock = _dockSets.takeAt(index);
+    auto ticker = dock->context()->tickerName();
+    dock->deleteLater();
 
     _instrumentTabBar->removeInstrumentTab(index);
+
+    Logger::log<Logger::LogLevel::Debug>("Тикер {} был удален!", ticker.toStdString());
 
     if (_dockSets.empty()) {
         _activeIndex = -1;

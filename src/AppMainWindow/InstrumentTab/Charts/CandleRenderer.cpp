@@ -4,6 +4,7 @@
 
 #include "CandleRenderer.h"
 
+#include <Logger/Logger.h>
 
 #include <AppTheme.h>
 
@@ -23,6 +24,8 @@ void CandleRenderer::draw(QPainter& painter, const CandleGeometry& geometry) {
         static_cast<int>(geometry.bodyWidth),
         static_cast<int>(geometry.bodyHeight)
     ), color);
+
+    Logger::log<Logger::LogLevel::Debug>("Рендеринг свечи!");
 }
 
 CandleRenderer::CandleGeometry CandleRenderer::calculateGeometry(const Market::Candle& candle, double x, double width,
@@ -41,6 +44,8 @@ CandleRenderer::CandleGeometry CandleRenderer::calculateGeometry(const Market::C
     const int wickBottom = priceToY(candle.lowPrice); // низ свечи
     const int bodyTop = priceToY(std::max(candle.openPrice, candle.closePrice)); // верх тела
     const int bodyBottom = priceToY(std::min(candle.openPrice, candle.closePrice));// низ тела
+
+    Logger::log<Logger::LogLevel::Debug>("Расчет геометрии свечи!");
 
     return {
         .wickX = static_cast<int>(x + width / 2.0),

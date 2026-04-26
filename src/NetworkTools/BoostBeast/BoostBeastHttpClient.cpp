@@ -24,6 +24,8 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::get(const std::
 
     auto parsedUrl = UrlParser::parse(url);
     if (!parsedUrl.has_value()) {
+        Logger::log<Logger::LogLevel::Error>("parsedUrl вернулся с ошибкой: {}!", parsedUrl.error().errorMessage);
+
         return std::unexpected(Http::Error{
             Http::ErrorType::InvalidUrl,
             parsedUrl.error().errorMessage
@@ -31,6 +33,8 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::get(const std::
     }
 
     if (parsedUrl->scheme != "http") {
+        Logger::log<Logger::LogLevel::Error>("Не поддерживает {}!", parsedUrl->scheme);
+
         return std::unexpected(Http::Error{
             Http::ErrorType::InvalidUrl,
             "HttpClient supports only http://, got: " + parsedUrl->scheme
@@ -80,11 +84,15 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::performHttpRequ
     if (session->finalEc) {
         // Проверяем, это timeout или другая ошибка
         if (session->finalEc == beast::error::timeout) {
+            Logger::log<Logger::LogLevel::Error>("session завершился по причине таймаута: {}!", _timeout.count());
+
             return std::unexpected(Http::Error{
                 Http::ErrorType::Timeout,
                 std::format("Request timed out after {}ms", _timeout.count())
             });
         }
+
+        Logger::log<Logger::LogLevel::Error>("session завершился с ошибкой: {}!", session->finalEc.message());
 
         return std::unexpected(Http::Error{
             Http::ErrorType::NetworkError,
@@ -96,7 +104,7 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::performHttpRequ
         beast::error_code ec;
         session->stream.socket().shutdown(tcp::socket::shutdown_both, ec);
         if (ec) {
-            Logger::log<Logger::LogLevel::Debug>("Graceful shutdown warning: {}", ec.message());
+            Logger::log<Logger::LogLevel::Error>("Graceful shutdown warning: {}", ec.message());
         }
     }
 
@@ -118,32 +126,33 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::performHttpRequ
     return Http::Response{statusCode, std::move(session->response.body()), std::move(headers)};
 }
 
-void BoostBeastHttpClient::resolveAsync(const std::shared_ptr<RequestSession>& session,
-                                        const Http::ParsedUrl& url) const {
-    session->resolver.async_resolve(url.host, url.port,
-                                    [this, session, &url](const beast::error_code& ec,
-                                                          const tcp::resolver::results_type& results) {
-                                        if (ec) {
-                                            session->finalEc = ec;
-                                            return;
-                                        }
+void BoostBeastHttpClient::resolveAsync(const std::shared_ptr<RequestSession>& session) const {
+    session->resolver.async_resolve(session->url.host, session->url.port,
+        [this, session](const beast::error_code& ec,
+                        const tcp::resolver::results_type& results) {
+            if (ec) {
+                Logger::log<Logger::LogLevel::Error>("async_resolve не удался: {}!", ec.message());
 
-                                        connectAsync(session, url, results);
-                                    }
+                session->finalEc = ec;
+                return;
+            }
+            session->resolveResults = results;
+            connectAsync(session);
+        }
     );
 }
 
-void BoostBeastHttpClient::connectAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url,
-                      const tcp::resolver::results_type& results) const {
-    session->stream.async_connect(results,
-                                  [this, session, &url](const beast::error_code& ec, const tcp::endpoint&) {
-                                      if (ec) {
-                                          session->finalEc = ec;
-                                          return;
-                                      }
+void BoostBeastHttpClient::connectAsync(const std::shared_ptr<RequestSession>& session) const {
+    session->stream.async_connect(session->resolveResults,
+        [this, session](const beast::error_code& ec, const tcp::endpoint&) {
+            if (ec) {
+                Logger::log<Logger::LogLevel::Error>("async_connect не удался: {}!", ec.message());
 
-                                      writeAsync(session, url);
-                                  }
+                session->finalEc = ec;
+                return;
+            }
+            writeAsync(session);
+        }
     );
 }
 
@@ -156,23 +165,26 @@ void BoostBeastHttpClient::writeAsync(const std::shared_ptr<RequestSession>& ses
     session->request.set(http::field::user_agent, _userAgent);
 
     http::async_write(session->stream, session->request,
-                      [this, session](const beast::error_code& ec, size_t) {
-                          if (ec) {
-                              session->finalEc = ec;
-                              return;
-                          }
+        [this, session](const beast::error_code& ec, size_t) {
+            if (ec) {
+                Logger::log<Logger::LogLevel::Error>("async_write не удался: {}!", ec.message());
 
-                          readAsync(session);
-                      }
+                session->finalEc = ec;
+                return;
+            }
+            readAsync(session);
+        }
     );
 }
 
 void BoostBeastHttpClient::readAsync(const std::shared_ptr<RequestSession>& session) const {
     http::async_read(session->stream, session->buffer, session->response,
-                     [session](const beast::error_code& ec, size_t) {
-                         if (ec) {
-                             session->finalEc = ec;
-                         }
-                     }
+        [session](const beast::error_code& ec, size_t) {
+            if (ec) {
+                Logger::log<Logger::LogLevel::Error>("readAsync не удался: {}!", ec.message());
+
+                session->finalEc = ec;
+            }
+        }
     );
 }

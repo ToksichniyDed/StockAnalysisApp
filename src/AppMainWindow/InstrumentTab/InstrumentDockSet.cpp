@@ -3,6 +3,7 @@
 //
 
 #include "InstrumentDockSet.h"
+#include <Logger/Logger.h>
 
 InstrumentDockSet::InstrumentDockSet(InstrumentContext* context, const std::shared_ptr<Exchange::IDataFetcher>& fetcher, QMainWindow* mainWindow,
                                      QObject* parent) : QObject(parent)
@@ -26,6 +27,8 @@ void InstrumentDockSet::show() {
         //TODO: восстановление положения доков между сессиями
         //_mainWindow->restoreState(_savedState);
     }
+
+    Logger::log<Logger::LogLevel::Debug>("Отображение доксета {}!", _context->tickerName().toStdString());
 }
 
 void InstrumentDockSet::hide() {
@@ -34,6 +37,8 @@ void InstrumentDockSet::hide() {
     _priceDock->hide();
     _cvdDock->hide();
     _vdDock->hide();
+
+    Logger::log<Logger::LogLevel::Debug>("Скрытие доксета {}!", _context->tickerName().toStdString());
 }
 
 InstrumentContext* InstrumentDockSet::context() const noexcept {

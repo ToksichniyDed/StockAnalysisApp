@@ -65,6 +65,8 @@ public:
 
     ~PriceChartDock() override = default;
 
+    PriceChartWidget* widget();
+
 private:
     PriceChartWidget* _priceChartWidget = nullptr;
 };
