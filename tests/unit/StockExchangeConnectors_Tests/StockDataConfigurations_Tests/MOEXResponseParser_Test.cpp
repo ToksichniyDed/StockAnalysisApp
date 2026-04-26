@@ -9,8 +9,8 @@
 #include <filesystem>
 #include <chrono>
 
-import MOEXResponseParser;
-import IExchangeDataFetcher;
+#include <StockExchangeConnectors/MOEXExchange/MOEXResponseParser.h>
+#include <StockExchangeConnectors/MOEXExchange/MOEXDataFetcher.h>
 
 class MOEXResponseParser_Test : public ::testing::Test {
 protected:

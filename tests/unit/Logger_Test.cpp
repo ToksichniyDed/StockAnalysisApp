@@ -2,8 +2,6 @@
 // Created by DED on 09.01.2026.
 //
 
-import Logger;
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -16,6 +14,7 @@ import Logger;
 #include <thread>
 #include <chrono>
 
+#include <Logger/Logger.h>
 
 // Кастомный sink для захвата логов в память
 class MemorySink : public spdlog::sinks::base_sink<std::mutex> {

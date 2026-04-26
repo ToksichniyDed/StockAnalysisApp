@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <expected>
 
-import ConfigurationParser;
+#include <StockExchangeConnectors/StockDataConfigurations/ConfigurationParser.h>
 
 class ConfigurationParserTest : public ::testing::Test {
 protected:
@@ -25,7 +25,7 @@ protected:
 };
 
 TEST_F(ConfigurationParserTest, ParsesSimpleConfig) {
-    ConfigurationParser parser(getFixture("valid_simple.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_simple.toml"));
 
     EXPECT_EQ(parser.getValue<std::string>("host").value(), "iss.moex.com");
     EXPECT_EQ(parser.getValue<int>("port").value(), 443);
@@ -35,7 +35,7 @@ TEST_F(ConfigurationParserTest, ParsesSimpleConfig) {
 }
 
 TEST_F(ConfigurationParserTest, ParsesNestedStructures) {
-    ConfigurationParser parser(getFixture("valid_nested.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_nested.toml"));
 
     EXPECT_EQ(parser.getValue<std::string>("network.host").value(), "example.com");
     EXPECT_EQ(parser.getValue<int>("network.port").value(), 8080);
@@ -49,7 +49,7 @@ TEST_F(ConfigurationParserTest, ParsesNestedStructures) {
 }
 
 TEST_F(ConfigurationParserTest, ParsesAllDataTypes) {
-    ConfigurationParser parser(getFixture("valid_types.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_types.toml"));
 
     // Strings
     EXPECT_EQ(parser.getValue<std::string>("string_value").value(), "test string");
@@ -75,7 +75,7 @@ TEST_F(ConfigurationParserTest, ParsesAllDataTypes) {
 }
 
 TEST_F(ConfigurationParserTest, ParsesMoexConfigCorrectly) {
-    ConfigurationParser parser(getFixture("valid_moex.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_moex.toml"));
 
     EXPECT_EQ(parser.getValue<std::string>("network.host").value(), "iss.moex.com");
     EXPECT_EQ(parser.getValue<std::string>("network.service").value(), "443");
@@ -93,7 +93,7 @@ TEST_F(ConfigurationParserTest, ParsesMoexConfigCorrectly) {
 }
 
 TEST_F(ConfigurationParserTest, RejectsNonExistentFile) {
-    ConfigurationParser parser(getFixture("does_not_exist.toml"));
+    Parser::ConfigurationParser parser(getFixture("does_not_exist.toml"));
 
     auto result = parser.getValue<std::string>("any.key");
     EXPECT_FALSE(result.has_value());
@@ -101,7 +101,7 @@ TEST_F(ConfigurationParserTest, RejectsNonExistentFile) {
 }
 
 TEST_F(ConfigurationParserTest, RejectsInvalidSyntax) {
-    ConfigurationParser parser(getFixture("invalid_syntax.toml"));
+    Parser::ConfigurationParser parser(getFixture("invalid_syntax.toml"));
 
     auto result = parser.getValue<std::string>("key");
     EXPECT_FALSE(result.has_value());
@@ -109,7 +109,7 @@ TEST_F(ConfigurationParserTest, RejectsInvalidSyntax) {
 }
 
 TEST_F(ConfigurationParserTest, ReturnsErrorForMissingKey) {
-    ConfigurationParser parser(getFixture("valid_simple.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_simple.toml"));
 
     auto result = parser.getValue<std::string>("nonexistent.key");
     EXPECT_FALSE(result.has_value());
@@ -117,7 +117,7 @@ TEST_F(ConfigurationParserTest, ReturnsErrorForMissingKey) {
 }
 
 TEST_F(ConfigurationParserTest, ReturnsErrorOnTypeMismatch) {
-    ConfigurationParser parser(getFixture("valid_types.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_types.toml"));
 
     // Пытаемся прочитать строку как число
     auto result = parser.getValue<int>("string_value");
@@ -126,7 +126,7 @@ TEST_F(ConfigurationParserTest, ReturnsErrorOnTypeMismatch) {
 }
 
 TEST_F(ConfigurationParserTest, HandlesEmptyFile) {
-    ConfigurationParser parser(getFixture("empty.toml"));
+    Parser::ConfigurationParser parser(getFixture("empty.toml"));
 
     auto result = parser.getValue<std::string>("any.key");
     EXPECT_FALSE(result.has_value());
@@ -136,14 +136,14 @@ TEST_F(ConfigurationParserTest, HandlesEmptyFile) {
 // --- Тесты дефолтных значений ---
 
 TEST_F(ConfigurationParserTest, ReturnsDefaultWhenKeyMissing) {
-    ConfigurationParser parser(getFixture("valid_simple.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_simple.toml"));
 
     auto value = parser.getValue<int>("missing_key", 999);
     EXPECT_EQ(value, 999);
 }
 
 TEST_F(ConfigurationParserTest, ReturnsDefaultWhenFileNotFound) {
-    ConfigurationParser parser(getFixture("nonexistent.toml"));
+    Parser::ConfigurationParser parser(getFixture("nonexistent.toml"));
 
     EXPECT_EQ(parser.getValue<std::string>("key", "default"), "default");
     EXPECT_EQ(parser.getValue<int>("key", 42), 42);
@@ -152,14 +152,14 @@ TEST_F(ConfigurationParserTest, ReturnsDefaultWhenFileNotFound) {
 }
 
 TEST_F(ConfigurationParserTest, ReturnsDefaultOnTypeMismatch) {
-    ConfigurationParser parser(getFixture("valid_types.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_types.toml"));
 
     auto value = parser.getValue<int>("string_value", 777);
     EXPECT_EQ(value, 777);
 }
 
 TEST_F(ConfigurationParserTest, ReturnsActualValueOverDefault) {
-    ConfigurationParser parser(getFixture("valid_simple.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_simple.toml"));
 
     auto timeout = parser.getValue<int>("timeout", 99);
     EXPECT_EQ(timeout, 30); // Реальное значение, не дефолт
@@ -168,7 +168,7 @@ TEST_F(ConfigurationParserTest, ReturnsActualValueOverDefault) {
 // --- Тесты граничных случаев ---
 
 TEST_F(ConfigurationParserTest, AllowsMultipleReads) {
-    ConfigurationParser parser(getFixture("valid_simple.toml"));
+    Parser::ConfigurationParser parser(getFixture("valid_simple.toml"));
 
     auto read1 = parser.getValue<std::string>("host");
     auto read2 = parser.getValue<std::string>("host");
@@ -180,7 +180,7 @@ TEST_F(ConfigurationParserTest, AllowsMultipleReads) {
 }
 
 TEST_F(ConfigurationParserTest, DefaultConstructorCreatesEmptyParser) {
-    ConfigurationParser parser;
+    Parser::ConfigurationParser parser;
 
     auto result = parser.getValue<std::string>("any.key");
     EXPECT_FALSE(result.has_value());

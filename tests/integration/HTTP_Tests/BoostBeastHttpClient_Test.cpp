@@ -3,8 +3,8 @@
 #include <string>
 #include <chrono>
 
-import IHttpClient;
-import HttpClientFactory;
+#include <NetworkTools/IHttpClient.h>
+#include <NetworkTools/HttpClientFactory.h>
 
 extern void registerBoostBeastHttpClient();
 

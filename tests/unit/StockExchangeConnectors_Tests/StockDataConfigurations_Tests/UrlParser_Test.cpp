@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-import UrlParser;
+#include <NetworkTools/UrlParser.h>
 
 class UrlParserTest : public ::testing::Test {
 };
