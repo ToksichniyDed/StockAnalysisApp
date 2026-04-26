@@ -13,22 +13,16 @@ void Logger::init(bool enableConsole, bool enableFile, const spdlog::level::leve
     if (enableConsole) {
         auto console = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         console->set_level(spdlog::level::trace);
-        console->set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
+        console->set_pattern("[%H:%M:%S.%e] [%^%l%$] [%s:%#] [%!] %v");
         loggerSinks.push_back(console);
     }
 
     if (enableFile) {
-        namespace fs = std::filesystem;
-        fs::create_directories("logs");
-
         auto file = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-            fileName,
-            1024 * 1024 * maxSizeMB,
-            maxFiles
+            fileName, 1024 * 1024 * maxSizeMB, maxFiles
         );
-
         file->set_level(spdlog::level::trace);
-        file->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] %v");
+        file->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] [%s:%#] [%!] %v");
         loggerSinks.push_back(file);
     }
 

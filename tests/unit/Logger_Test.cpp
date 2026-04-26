@@ -32,6 +32,35 @@ protected:
     }
 };
 
+class SourceLocationCaptureSink : public spdlog::sinks::base_sink<std::mutex> {
+public:
+    struct CapturedEntry {
+        std::string filename;
+        int line{};
+        std::string funcname;
+        std::string message;
+    };
+
+    std::vector<CapturedEntry> entries;
+
+protected:
+    void sink_it_(const spdlog::details::log_msg& msg) override {
+        CapturedEntry entry;
+        entry.filename = msg.source.filename ? msg.source.filename : "";
+        entry.line = msg.source.line;
+        entry.funcname = msg.source.funcname ? msg.source.funcname : "";
+
+        spdlog::memory_buf_t buf;
+        formatter_->format(msg, buf);
+        entry.message = fmt::to_string(buf);
+
+        entries.push_back(std::move(entry));
+    }
+
+    void flush_() override {
+    }
+};
+
 // Fixture для тестов Logger
 class LoggerTest : public ::testing::Test {
 protected:
@@ -74,11 +103,6 @@ TEST_F(LoggerTest, InitWithMemorySink) {
     ASSERT_EQ(memorySink->messages.size(), 1);
     EXPECT_THAT(memorySink->messages[0], testing::HasSubstr("[info]"));
     EXPECT_THAT(memorySink->messages[0], testing::HasSubstr("Test message 42"));
-
-    // Проверяем наличие сигнатуры функции
-    // FUNC_SIG раскрывается компилятором в полную сигнатуру функции Logger::log
-    // На MSVC: "void __cdecl Logger::log<Logger::LogLevel::Info,int>(...)"
-    EXPECT_THAT(memorySink->messages[0], testing::HasSubstr("Logger::log<Logger::LogLevel::Info"));
 }
 
 TEST_F(LoggerTest, LevelFiltering) {
@@ -317,4 +341,31 @@ TEST(LoggerFileTest, InitWithNeitherConsoleNorFile) {
     // Cleanup
     spdlog::drop_all();
     Logger::TestingLogger::resetLogger();
+}
+
+TEST_F(LoggerTest, SourceLocationPointsToCallSite) {
+    // Arrange
+    auto locationSink = std::make_shared<SourceLocationCaptureSink>();
+    locationSink->set_level(spdlog::level::trace);
+
+    auto testLogger = std::make_shared<spdlog::logger>(
+        "LocationTestLogger",
+        spdlog::sinks_init_list{ locationSink }
+    );
+    testLogger->set_level(spdlog::level::trace);
+    Logger::TestingLogger::setLogger(testLogger);
+
+    Logger::log<Logger::LogLevel::Info>("source location test");
+
+    // Assert
+    ASSERT_EQ(locationSink->entries.size(), 1);
+
+    const auto& entry = locationSink->entries[0];
+
+    EXPECT_THAT(entry.filename, testing::HasSubstr("Logger_Test.cpp"));
+
+    EXPECT_THAT(entry.funcname,
+                testing::Not(testing::HasSubstr("Logger::log")));
+
+    EXPECT_GT(entry.line, 0);
 }

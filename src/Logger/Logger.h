@@ -8,19 +8,12 @@
 #include <memory>
 #include <filesystem>
 #include <utility>
+#include <source_location>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/null_sink.h>
-
-#if defined(_MSC_VER)
-#define FUNC_SIG __FUNCSIG__
-#elif defined(__GNUC__) || defined(__clang__)
-#define FUNC_SIG __PRETTY_FUNCTION__
-#else
-#define FUNC_SIG __func__
-#endif
 
 namespace Logger {
     extern std::shared_ptr<spdlog::logger> logger;
@@ -35,6 +28,18 @@ namespace Logger {
         Off = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::off)
     };
 
+    template <LogLevel Level>
+    struct LogFmtWithLocation {
+        std::string_view _fmt;
+        std::source_location _loc;
+
+        template <typename S>
+        LogFmtWithLocation(S&& fmt,
+                           std::source_location loc = std::source_location::current()) : _fmt(std::forward<S>(fmt)),
+            _loc(loc) {
+        }
+    };
+
     void init(bool enableConsole, bool enableFile, const spdlog::level::level_enum defaultLevel,
               const std::string& fileName, const std::size_t maxSizeMB, const std::size_t maxFiles);
     void setLoggingLevel(const LogLevel logLevel);
@@ -42,10 +47,18 @@ namespace Logger {
     void enable(const spdlog::level::level_enum lvl = spdlog::level::info);
 
     template <LogLevel Level, typename... Args>
-    void log(fmt::format_string<Args...> msg, Args&&... args) {
+    void log(LogFmtWithLocation<Level> fmtWithLoc, Args&&... args) {
         if (logger) {
-            logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG,
-                        fmt::format(msg, std::forward<Args>(args)...));
+            logger->log(
+                spdlog::source_loc{
+                    fmtWithLoc._loc.file_name(),
+                    static_cast<int>(fmtWithLoc._loc.line()),
+                    fmtWithLoc._loc.function_name()
+                },
+                static_cast<spdlog::level::level_enum>(Level),
+                fmt::format(fmt::runtime(fmtWithLoc._fmt),
+                            std::forward<Args>(args)...)
+            );
         }
     }
 
