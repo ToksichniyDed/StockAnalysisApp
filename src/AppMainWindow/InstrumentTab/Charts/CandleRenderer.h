@@ -7,7 +7,7 @@
 
 #include <QPainter>
 
-#include <Market.h>
+#include <Market/Market.h>
 
 class CandleRenderer {
 

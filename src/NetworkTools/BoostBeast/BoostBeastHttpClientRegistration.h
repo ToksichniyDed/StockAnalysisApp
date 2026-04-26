@@ -1,11 +1,6 @@
-//
-// BoostBeastHttpClient_Registration.cpp
-// Регистрирует BoostBeastHttpClient в фабрике
-// ЭТОТ файл - единственный, который импортирует модуль с Boost
-//
+#pragma once
 
 #include <memory>
-#include <boost/asio/error.hpp>
 
 #include <NetworkTools/HttpClientFactory.h>
 #include <NetworkTools/IHttpClient.h>

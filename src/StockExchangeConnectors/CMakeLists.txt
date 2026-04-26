@@ -21,9 +21,19 @@ set(STOCK_EXCHANGE_CONNECTORS_SOURCE
         StockDataConfigurations/ConfigurationParser.cpp
 )
 
+set(MOEX_CONFIG_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/StockDataConfigurations/MOEX/MOEXconfig.toml"
+)
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/StockDataConfigurations/MOEX/MOEXconfig.h.in
+        ${CMAKE_BINARY_DIR}/generated/MOEXconfig.h
+)
+
 add_library(StockExchangeConnectors STATIC
         ${STOCK_EXCHANGE_CONNECTORS_HEADERS}
         ${STOCK_EXCHANGE_CONNECTORS_SOURCE}
+        ${STOCK_EXCHANGE_DATA_CONFIGURATIONS}
 )
 
 find_package(OpenSSL REQUIRED)
@@ -35,4 +45,5 @@ target_link_libraries(StockExchangeConnectors PUBLIC Boost::json Boost::headers 
 target_include_directories(StockExchangeConnectors
         PUBLIC
         ${PROJECT_SOURCE_DIR}/src
+        ${CMAKE_BINARY_DIR}/generated
 )

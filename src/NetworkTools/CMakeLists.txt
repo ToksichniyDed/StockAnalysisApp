@@ -6,16 +6,16 @@ set(NETWORK_TOOLS_HEADERS
         BoostBeast/BoostBeastHttpClient.h
 )
 
-set(NETWORK_TOOLS_SOURCE
+set(NETWORK_TOOLS_SOURCES
         HttpClientFactory.cpp
 
         BoostBeast/BoostBeastHttpClient.cpp
-        BoostBeast/BoostBeastHttpClientRegistration.cpp
+        BoostBeast/BoostBeastHttpClientRegistration.h
 )
 
 add_library(NetworkTools
         ${NETWORK_TOOLS_HEADERS}
-        ${NETWORK_TOOLS_SOURCE}
+        ${NETWORK_TOOLS_SOURCES}
 )
 
 find_package(OpenSSL REQUIRED)

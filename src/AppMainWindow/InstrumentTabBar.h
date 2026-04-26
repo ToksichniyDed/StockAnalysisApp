@@ -9,8 +9,8 @@
 #include <QLineEdit>
 #include <QHBoxLayout>
 
-#include <InstrumentContext.h>
-#include <InstrumentTabButton.h>
+#include <InstrumentTab/InstrumentContext.h>
+#include <InstrumentTab/InstrumentTabButton.h>
 
 class InstrumentTabBar : public QWidget {
 

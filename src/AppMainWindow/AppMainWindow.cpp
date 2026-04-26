@@ -4,19 +4,18 @@
 
 #include <QToolBar>
 
-#include <Market.h>
+#include <Market/Market.h>
 #include <AppMainWindow.h>
 #include <AppTheme.h>
 #include <ActivityBar.h>
+
+#include "StockExchangeConnectors/MOEXExchange/MOEXDataFetcher.h"
 
 AppMainWindow::AppMainWindow(QWidget* parent) : QMainWindow(parent) {
     setupUi();
     setStyleSheet(AppTheme::baseStyleSheet());
     setPalette(AppTheme::buildPalette());
     setMinimumSize(1400, 860);
-}
-
-AppMainWindow::~AppMainWindow() {
 }
 
 void AppMainWindow::slot_AddInstrumentTab(const QString& ticker) {
@@ -29,7 +28,8 @@ void AppMainWindow::slot_AddInstrumentTab(const QString& ticker) {
     }
 
     auto newContext = new InstrumentContext(Market::Ticker{ticker.toStdString()}, Market::Timeframe::Day, this);
-    auto* newDockSet = new InstrumentDockSet(newContext, this, this);
+    auto newDataFetcher = std::make_shared<MOEXDataFetcher>();
+    auto* newDockSet = new InstrumentDockSet(newContext, newDataFetcher,this, this);
     _dockSets.append(newDockSet);
 
     _instrumentTabBar->addInstrumentTab(newContext);

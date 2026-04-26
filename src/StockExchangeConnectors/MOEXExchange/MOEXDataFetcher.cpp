@@ -6,12 +6,26 @@
 
 #include <NetworkTools/HttpClientFactory.h>
 
+
 MOEXDataFetcher::MOEXDataFetcher(const std::filesystem::path& filePath,
-                             std::shared_ptr<IHttpClient> httpClient,
-                             std::shared_ptr<Parser::ConfigurationParser> configurationParser) : IDataFetcher(
-            std::make_shared<Parser::ConfigurationParser>(filePath)),
-        _httpClient(HttpClientFactory::instance().create("default")),
-        _moexResponseParser(std::make_shared<MOEXResponseParser>()) {
+                                 std::shared_ptr<IHttpClient> httpClient,
+                                 std::shared_ptr<MOEXResponseParser> responseParser,
+                                 const std::shared_ptr<Parser::ConfigurationParser>&
+                                 configurationParser) : IDataFetcher(
+                                                            std::make_shared<Parser::ConfigurationParser>(
+                                                                filePath.empty() ? MOEX_CONFIG_PATH : filePath)),
+                                                        _httpClient(
+                                                            httpClient.get()
+                                                            ? httpClient
+                                                            : HttpClientFactory::instance().create("default")),
+                                                        _moexResponseParser(
+                                                            responseParser.get()
+                                                            ? responseParser
+                                                            : std::make_shared<MOEXResponseParser>()),
+                                                        _configurationParser(configurationParser.get()
+                                                                             ? configurationParser
+                                                                             : std::make_shared<
+                                                                                 Parser::ConfigurationParser>()) {
 }
 
 std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher::fetchCandles(

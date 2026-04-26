@@ -4,12 +4,30 @@
 
 #include "InstrumentSession.h"
 
-InstrumentSession::InstrumentSession(InstrumentContext* context, QObject* parent): QObject(parent), _context(context) {
+#include <QtConcurrent/QtConcurrentRun>
+#include <utility>
+
+InstrumentSession::InstrumentSession(InstrumentContext* context, std::shared_ptr<Exchange::IDataFetcher> fetcher, QObject* parent): QObject(parent), _context(context), _dataFetcher(std::move(fetcher)) {
 }
 
-void InstrumentSession::load(Market::TimePoint from, Market::TimePoint till) {
+void InstrumentSession::load(const Market::TimePoint from, const Market::TimePoint till) {
     _lastFrom = from;
     _lastTill = till;
+
+    auto fetcher = _dataFetcher;
+    auto ticker = _context->ticker();
+    auto timeframe = _context->timeframe();
+
+    auto future = QtConcurrent::run([this, fetcher, ticker, timeframe, from, till] {
+        auto result = fetcher->fetchCandles(ticker, from, till, timeframe);
+
+        if (!result.has_value()) {
+            return;
+        }
+
+        _candles = std::move(result.value());
+        emit signal_candlesReady();
+    });
 }
 
 void InstrumentSession::reload() {

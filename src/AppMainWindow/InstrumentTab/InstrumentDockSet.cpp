@@ -4,11 +4,11 @@
 
 #include "InstrumentDockSet.h"
 
-InstrumentDockSet::InstrumentDockSet(InstrumentContext* context, QMainWindow* mainWindow,
+InstrumentDockSet::InstrumentDockSet(InstrumentContext* context, const std::shared_ptr<Exchange::IDataFetcher>& fetcher, QMainWindow* mainWindow,
                                      QObject* parent) : QObject(parent)
                                                         , _mainWindow(mainWindow)
                                                         , _context(context)
-                                                        , _session(new InstrumentSession(context, this)) {
+                                                        , _session(new InstrumentSession(context, fetcher, this)) {
     setupDocks();
 }
 

@@ -34,7 +34,7 @@ protected:
 
 private:
     [[nodiscard]] QRect closeButtonRect() const noexcept;
-    void recalcWidth() noexcept;
+    void recalculateWidth() noexcept;
 
 private:
     InstrumentContext* _instrumentContext = nullptr;

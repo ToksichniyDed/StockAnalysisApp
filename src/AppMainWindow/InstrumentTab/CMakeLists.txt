@@ -27,14 +27,12 @@ add_library(InstrumentTab STATIC
         ${INSTRUMENT_TAB_HEADERS}
 )
 
-target_link_libraries(InstrumentTab PRIVATE
+target_link_libraries(InstrumentTab PUBLIC
         Qt6::Core
         Qt6::Gui
         Qt6::Widgets
-        Market
-        AppTheme)
 
-target_include_directories(InstrumentTab
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        Market
+        AppTheme
+        StockExchangeConnectors
 )

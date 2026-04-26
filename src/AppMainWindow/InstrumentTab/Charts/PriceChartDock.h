@@ -6,9 +6,7 @@
 #define COOLAPPNAME_PRICECHARTDOCK_H
 
 #include <QDockWidget>
-#include <Market.h>
-
-#include "InstrumentContext.h"
+#include <Market/Market.h>
 
 class InstrumentContext;
 class InstrumentSession;
@@ -37,7 +35,7 @@ private:
     void drawAxisY(QPainter& painter) const;
     void drawAxisX(QPainter& painter) const;
 
-    void recalcView();
+    void recalculateView();
     [[nodiscard]] int visibleCandleCount() const noexcept;
 
 private:

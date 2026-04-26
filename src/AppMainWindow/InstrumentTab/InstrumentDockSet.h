@@ -20,6 +20,7 @@ class InstrumentDockSet : public QObject {
 
 public:
     explicit InstrumentDockSet(InstrumentContext* context,
+                               const std::shared_ptr<Exchange::IDataFetcher>& fetcher,
                                QMainWindow* mainWindow,
                                QObject* parent = nullptr);
 

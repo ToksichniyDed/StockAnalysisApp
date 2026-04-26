@@ -6,7 +6,7 @@
 #define COOLAPPNAME_INSTRUMENTCONTEXT_H
 
 #include <QObject>
-#include <Market.h>
+#include <Market/Market.h>
 
 class InstrumentContext final : public QObject {
 

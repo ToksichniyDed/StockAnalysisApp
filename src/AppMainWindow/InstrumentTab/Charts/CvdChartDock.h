@@ -7,8 +7,6 @@
 
 #include <QDockWidget>
 
-#include "InstrumentContext.h"
-
 class InstrumentContext;
 class InstrumentSession;
 

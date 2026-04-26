@@ -8,7 +8,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-#include <InstrumentDockSet.h>
+#include <InstrumentTab/InstrumentDockSet.h>
 
 class ActivityBar : public QWidget {
 

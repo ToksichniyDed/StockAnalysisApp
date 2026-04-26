@@ -5,10 +5,8 @@
 #ifndef COOLAPPNAME_APPMAINWINDOW_H
 #define COOLAPPNAME_APPMAINWINDOW_H
 
-#include <QMainWindow>
-
+#include <InstrumentTab/InstrumentDockSet.h>
 #include <InstrumentTabBar.h>
-#include <InstrumentDockSet.h>
 
 #include "ActivityBar.h"
 
@@ -17,7 +15,7 @@ class AppMainWindow final : public QMainWindow {
 
 public:
     explicit AppMainWindow(QWidget* parent = nullptr);
-    ~AppMainWindow() override;
+    ~AppMainWindow() override = default;
 
 private slots:
     void slot_AddInstrumentTab(const QString& ticker);

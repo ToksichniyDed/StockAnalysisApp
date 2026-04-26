@@ -4,6 +4,8 @@
 
 #include "CvdChartDock.h"
 
+#include <InstrumentTab/InstrumentContext.h>
+
 CvdChartDock::CvdChartDock(InstrumentContext* context, InstrumentSession* session, QWidget* parent) : QDockWidget(
     context->tickerName(), parent) {
     setSizePolicy(

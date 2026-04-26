@@ -14,7 +14,7 @@ add_subdirectory(Market)
 
 add_library(Logger)
 #target_sources(Logger PUBLIC FILE_SET CXX_MODULES FILES Logger.ixx)
-target_sources(Logger PUBLIC Logger/Logger.h Logger/Logger.cpp)
+target_sources(Logger PUBLIC Logger/Logger.cpp)
 target_link_libraries(Logger PUBLIC spdlog::spdlog)
 target_compile_definitions(Logger PUBLIC _WIN32_WINNT=0x0A00)
 

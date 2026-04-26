@@ -30,11 +30,11 @@ InstrumentTabButton::InstrumentTabButton(InstrumentContext* instrumentContext, Q
 
     connect(_instrumentContext, &InstrumentContext::signal_tickerChanged,
             this, [this](const Market::Ticker&) {
-                recalcWidth();
+                recalculateWidth();
                 update();
             });
 
-    recalcWidth();
+    recalculateWidth();
 }
 
 InstrumentTabButton::~InstrumentTabButton() {
@@ -138,7 +138,7 @@ void InstrumentTabButton::leaveEvent(QEvent* event) {
     update();
 }
 
-void InstrumentTabButton::recalcWidth() noexcept {
+void InstrumentTabButton::recalculateWidth() noexcept {
     const QFontMetrics fm(AppTheme::monoFont(11));
     const int textW = fm.horizontalAdvance(_instrumentContext->tickerName());
     setFixedWidth(H_PAD + MARKER_SIZE + SPACING + textW + 4 + CLOSE_SIZE + H_PAD);

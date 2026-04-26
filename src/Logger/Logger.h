@@ -23,7 +23,7 @@
 #endif
 
 namespace Logger {
-    std::shared_ptr<spdlog::logger> logger;
+    extern std::shared_ptr<spdlog::logger> logger;
 
     enum class LogLevel : std::underlying_type_t<spdlog::level::level_enum> {
         Trace = static_cast<std::underlying_type_t<spdlog::level::level_enum>>(spdlog::level::trace),
@@ -42,18 +42,23 @@ namespace Logger {
     void enable(const spdlog::level::level_enum lvl = spdlog::level::info);
 
     template <LogLevel Level, typename... Args>
-    void log(fmt::format_string<Args...> msg, Args&&... args);
+    void log(fmt::format_string<Args...> msg, Args&&... args) {
+        if (logger) {
+            logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG,
+                        fmt::format(msg, std::forward<Args>(args)...));
+        }
+    }
 
     namespace TestingLogger {
-        void setLogger(std::shared_ptr<spdlog::logger> customLogger) {
+        inline void setLogger(std::shared_ptr<spdlog::logger> customLogger) {
             logger = std::move(customLogger);
         }
 
-        std::shared_ptr<spdlog::logger> getLogger() {
+        inline std::shared_ptr<spdlog::logger> getLogger() {
             return logger;
         }
 
-        void resetLogger() {
+        inline void resetLogger() {
             logger = nullptr;
         }
     }

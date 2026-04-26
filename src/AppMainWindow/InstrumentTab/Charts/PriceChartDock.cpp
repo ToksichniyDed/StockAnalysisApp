@@ -10,6 +10,8 @@
 #include "AppTheme.h"
 #include "CandleRenderer.h"
 
+#include <InstrumentTab/InstrumentContext.h>
+
 PriceChartWidget::PriceChartWidget(QWidget* parent) : QWidget(parent) {
     setMouseTracking(true);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -20,7 +22,7 @@ void PriceChartWidget::setCandles(std::vector<Market::Candle>& candles) {
 
     _candleWidth = 0.0; // сбрасываем чтобы recalcView пересчитал под новые данные
     _viewOffset = 0;
-    recalcView();
+    recalculateView();
 
     update();
 }
@@ -36,7 +38,7 @@ void PriceChartWidget::paintEvent(QPaintEvent* event) {
 
 void PriceChartWidget::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
-    recalcView();
+    recalculateView();
     update();
 }
 
@@ -52,20 +54,17 @@ void PriceChartWidget::wheelEvent(QWheelEvent* event) {
             MAX_CANDLE_W
         );
 
-        const int maxOffset = std::max(0,
-                                       static_cast<int>(_candles.size()) - visibleCandleCount()
-        );
+        const int maxOffset = std::max(0, static_cast<int>(_candles.size()) - visibleCandleCount());
+
         _viewOffset = std::clamp(_viewOffset, 0, maxOffset);
     } else {
         // просто колесо — скролл
         const int step = (delta > 0) ? -3 : 3;
-        const int maxOffset = std::max(0,
-                                       static_cast<int>(_candles.size()) - visibleCandleCount()
-        );
+        const int maxOffset = std::max(0, static_cast<int>(_candles.size()) - visibleCandleCount());
         _viewOffset = std::clamp(_viewOffset + step, 0, maxOffset);
     }
 
-    recalcView();
+    recalculateView();
     update();
     event->accept();
 }
@@ -231,7 +230,7 @@ void PriceChartWidget::drawBackground(QPainter& painter) const {
     painter.drawLine(0, chartRect().height(), chartRect().width(), chartRect().height());
 }
 
-void PriceChartWidget::recalcView() {
+void PriceChartWidget::recalculateView() {
     if (_candles.empty())
         return;
 

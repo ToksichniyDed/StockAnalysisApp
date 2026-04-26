@@ -4,6 +4,8 @@
 
 #include "Logger.h"
 
+std::shared_ptr<spdlog::logger> Logger::logger = nullptr;
+
 void Logger::init(bool enableConsole, bool enableFile, const spdlog::level::level_enum defaultLevel,
                   const std::string& fileName, const std::size_t maxSizeMB, const std::size_t maxFiles) {
     std::vector<spdlog::sink_ptr> loggerSinks;
@@ -55,12 +57,4 @@ void Logger::disableLogger() {
 void Logger::enable(const spdlog::level::level_enum lvl) {
     if (logger)
         logger->set_level(lvl);
-}
-
-template <Logger::LogLevel Level, typename... Args>
-void Logger::log(fmt::format_string<Args...> msg, Args&&... args) {
-    if (logger) {
-        logger->log(static_cast<spdlog::level::level_enum>(Level), "[{}] {}", FUNC_SIG,
-                    fmt::format(msg, std::forward<Args>(args)...));
-    }
 }

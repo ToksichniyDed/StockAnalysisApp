@@ -1,0 +1,3 @@
+#pragma once
+
+#define MOEX_CONFIG_PATH "@MOEX_CONFIG_PATH@"
