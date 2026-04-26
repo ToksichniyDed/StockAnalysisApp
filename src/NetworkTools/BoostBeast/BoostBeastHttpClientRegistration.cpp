@@ -7,9 +7,9 @@
 #include <memory>
 #include <boost/asio/error.hpp>
 
-import HttpClientFactory;
-import IHttpClient;
-import BoostBeastHttpClient;
+#include <NetworkTools/HttpClientFactory.h>
+#include <NetworkTools/IHttpClient.h>
+#include <NetworkTools/BoostBeast/BoostBeastHttpClient.h>
 
 namespace {
     HttpClientRegistrar boostBeastRegistrar(
