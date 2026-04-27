@@ -2,6 +2,5 @@
   "candles": {
     "columns": ["open", "close", "high", "low", "value", "volume", "begin", "end"],
     "data": []
-  },
-  "data": []
+  }
 }

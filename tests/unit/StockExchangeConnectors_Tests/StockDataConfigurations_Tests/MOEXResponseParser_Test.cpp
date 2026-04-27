@@ -169,11 +169,11 @@ TEST_F(MOEXResponseParser_Test, RejectsInvalidDateTime) {
 
 TEST_F(MOEXResponseParser_Test, ParsesInlineJson) {
     std::string json = R"({
-        "candles": {"columns": [], "data": []},
-        "data": [
-            [100.0, 101.0, 102.0, 99.0, 500000.0, 5000.0, "2024-01-01 10:00:00", "2024-01-01 18:50:00"]
-        ]
-    })";
+    "candles": {
+        "columns": ["open","close","high","low","value","volume","begin","end"],
+        "data": [[100.0, 101.0, 102.0, 99.0, 500000.0, 5000.0, "2024-01-01 10:00:00", "2024-01-01 18:50:00"]]
+    }
+})";
 
     auto result = _parser.parse(json);
     ASSERT_TRUE(result.has_value())<<result.error().errorMessage;;
@@ -194,9 +194,7 @@ TEST_F(MOEXResponseParser_Test, PreservesDataOrder) {
 
 TEST_F(MOEXResponseParser_Test, ReservesCapacityCorrectly) {
     // Создаем JSON с большим количеством свечей
-    std::string json = R"({
-        "candles": {"columns": [], "data": []},
-        "data": [)";
+    std::string json = R"({"candles": {"columns": [], "data": [)";
 
     for (int i = 0; i < 100; ++i) {
         json += std::format(
@@ -205,7 +203,7 @@ TEST_F(MOEXResponseParser_Test, ReservesCapacityCorrectly) {
         );
         if (i < 99) json += ",";
     }
-    json += "]}";
+    json += "]}}";
 
     auto result = _parser.parse(json);
     ASSERT_TRUE(result.has_value())<<result.error().errorMessage;;

@@ -1,9 +1,8 @@
 {
   "candles": {
     "columns": ["open", "close", "high", "low", "value", "volume", "begin", "end"],
-    "data": []
-  },
-  "data": [
-    [100.0, 101.0, 102.0, 99.0, 500000.0, 5000.0, "invalid-date-format", "2024-01-01 18:50:00"]
-  ]
+    "data": [
+      [100.0, 101.0, 102.0, 99.0, 500000.0, 5000.0, "invalid-date-format", "2024-01-01 18:50:00"]
+    ]
+  }
 }

@@ -36,7 +36,10 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXResponsePar
             "'candles' is not an object"
         });
     }
-    if (!response.contains("data") || !response.at("data").is_array()) {
+
+    const auto& candles = response.at("candles").as_object();
+
+    if (!candles.contains("data") || !candles.at("data").is_array()) {
             Logger::log<Logger::LogLevel::Error>("'data' не является массивом");
             return std::unexpected(Exchange::FetchError{
                 Exchange::FetchStatus::ParseError,
@@ -44,7 +47,7 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXResponsePar
             });
         }
 
-    const auto& data = response.at("data").as_array();
+    const auto& data = candles.at("data").as_array();
     Logger::log<Logger::LogLevel::Debug>("Получено {} строк данных", data.size());
 
     if (data.empty()) {
