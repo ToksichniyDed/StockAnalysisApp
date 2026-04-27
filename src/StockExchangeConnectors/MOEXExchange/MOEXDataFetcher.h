@@ -37,7 +37,6 @@ protected:
 protected:
     std::shared_ptr<IHttpClient> _httpClient;
     std::shared_ptr<MOEXResponseParser> _moexResponseParser;
-    std::shared_ptr<Parser::ConfigurationParser> _configurationParser;
 };
 
 #endif //COOLAPPNAME_MOEXDATAFETCHER_H

@@ -90,6 +90,13 @@ namespace Http {
         }
     };
 
+    static const std::unordered_map<std::string, std::string> DEFAULT_PORTS = {
+        {"http",  "80"},
+        {"https", "443"},
+        {"ftp",   "21"},
+        {"ssh",   "22"}
+    };
+
     struct ParseUrlError {
         std::string errorMessage;
 

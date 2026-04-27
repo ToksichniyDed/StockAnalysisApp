@@ -39,3 +39,7 @@ void InstrumentSession::reload() {
     load(_lastFrom, _lastTill);
 }
 
+std::vector<Market::Candle>& InstrumentSession::candles() {
+    return _candles;
+}
+

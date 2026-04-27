@@ -11,6 +11,8 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXResponsePar
     boost::system::error_code errorCode;
     boost::json::value jsonValue = boost::json::parse(jsonBody, errorCode);
 
+    Logger::log<Logger::LogLevel::Debug>("HTTP тело ответа: {}", jsonBody);
+
     if (errorCode) {
         Logger::log<Logger::LogLevel::Error>("Ошибка парсинга JSON: {}", errorCode.message());
         return std::unexpected(Exchange::FetchError{

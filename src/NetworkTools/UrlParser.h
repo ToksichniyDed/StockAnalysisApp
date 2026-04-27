@@ -29,6 +29,9 @@ public:
 
         if (match[3].matched) {
             parsed.port = match[3].str();
+        } else {
+            auto it = Http::DEFAULT_PORTS.find(parsed.scheme);
+            parsed.port = (it != Http::DEFAULT_PORTS.end()) ? it->second : "80";
         }
 
         parsed.path = match[4].matched ? match[4].str() : "/";

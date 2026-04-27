@@ -75,7 +75,8 @@ std::expected<Http::Response, Http::Error> BoostBeastHttpClient::performHttpRequ
     beast::get_lowest_layer(session->stream).expires_after(_timeout);
 
     // Запускаем async-цепочку
-    resolveAsync(session, url);
+    session->url = url;
+    resolveAsync(session);
 
     // Единственный run() — крутит event loop до завершения всей цепочки
     session->ioc.run();
@@ -156,12 +157,11 @@ void BoostBeastHttpClient::connectAsync(const std::shared_ptr<RequestSession>& s
     );
 }
 
-void BoostBeastHttpClient::writeAsync(const std::shared_ptr<RequestSession>& session,
-                                      const Http::ParsedUrl& url) const {
+void BoostBeastHttpClient::writeAsync(const std::shared_ptr<RequestSession>& session) const {
     session->request.method(http::verb::get);
-    session->request.target(url.fullPath());
+    session->request.target(session->url.fullPath());
     session->request.version(11);
-    session->request.set(http::field::host, url.host);
+    session->request.set(http::field::host, session->url.host);
     session->request.set(http::field::user_agent, _userAgent);
 
     http::async_write(session->stream, session->request,

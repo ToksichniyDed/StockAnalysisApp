@@ -36,7 +36,7 @@ namespace Parser {
 
         template <Parser::configValue T>
         [[nodiscard]] std::expected<T, Parser::ExchangeConfigurationError> getValue(const std::string& key) const {
-            if (!_config) {
+            if (!_config.has_value()) {
                 auto err = _lastError.value_or(Parser::ExchangeConfigurationError::FileNotFound);
                 Logger::log<Logger::LogLevel::Error>("Попытка чтения без конфига (ошибка: {})", static_cast<int>(err));
                 return std::unexpected(err);

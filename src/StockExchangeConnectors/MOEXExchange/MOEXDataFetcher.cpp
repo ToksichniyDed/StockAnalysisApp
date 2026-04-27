@@ -11,7 +11,7 @@ MOEXDataFetcher::MOEXDataFetcher(const std::filesystem::path& filePath,
                                  std::shared_ptr<IHttpClient> httpClient,
                                  std::shared_ptr<MOEXResponseParser> responseParser,
                                  const std::shared_ptr<Parser::ConfigurationParser>&
-                                 configurationParser) : IDataFetcher(
+                                 configurationParser) : IDataFetcher(configurationParser.get() ? configurationParser :
                                                             std::make_shared<Parser::ConfigurationParser>(
                                                                 filePath.empty() ? MOEX_CONFIG_PATH : filePath)),
                                                         _httpClient(
@@ -21,11 +21,7 @@ MOEXDataFetcher::MOEXDataFetcher(const std::filesystem::path& filePath,
                                                         _moexResponseParser(
                                                             responseParser.get()
                                                             ? responseParser
-                                                            : std::make_shared<MOEXResponseParser>()),
-                                                        _configurationParser(configurationParser.get()
-                                                                             ? configurationParser
-                                                                             : std::make_shared<
-                                                                                 Parser::ConfigurationParser>()) {
+                                                            : std::make_shared<MOEXResponseParser>()) {
 }
 
 std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher::fetchCandles(
@@ -85,7 +81,7 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
     do {
         constexpr int pageSize = 1000;
-        std::string url = std::format("https://{}{}&start={}",
+        std::string url = std::format("http://{}{}&start={}",
                                       *hostOpt, target, start);
 
         std::expected<Http::Response, Http::Error> httpResult = _httpClient->get(url);
@@ -102,8 +98,13 @@ std::expected<std::vector<Market::Candle>, Exchange::FetchError> MOEXDataFetcher
 
         const auto& parsedResponse = _moexResponseParser->parse(httpResult.value().body);
         if (!parsedResponse.has_value()) {
-            Logger::log<Logger::LogLevel::Error>("parsedResponse c ошибкой  {}!", parsedResponse.error().errorMessage);
 
+            if (parsedResponse.error().status == Exchange::FetchStatus::NoDataFound) {
+                Logger::log<Logger::LogLevel::Debug>("Данные закончились, накоплено {} свечей", allCandles.size());
+                break;
+            }
+
+            Logger::log<Logger::LogLevel::Error>("parsedResponse c ошибкой {}!", parsedResponse.error().errorMessage);
             return std::unexpected(Exchange::FetchError{
                 Exchange::FetchStatus::ParseError,
                 std::format("Parsing error: {}", parsedResponse.error().errorMessage),

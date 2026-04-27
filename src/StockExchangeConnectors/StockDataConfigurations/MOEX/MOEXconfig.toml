@@ -1,6 +1,6 @@
 [network]
 host = "iss.moex.com"
-service = "https"
+service = "http"
 
 [http]
 userAgent = "MOEXFetcher"

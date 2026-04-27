@@ -47,6 +47,10 @@ public slots:
     void slot_VdChartDockVisible(bool visible);
     void slot_ResetDocksLayout();
 
+    void slot_PriceChartSetCandles() const;
+    void slot_CvdChartSetCandles();
+    void slot_VdChartSetCandles();
+
 private:
     void setupDocks();
     void applyDefaultLayout();

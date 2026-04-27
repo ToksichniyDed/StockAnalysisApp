@@ -42,6 +42,8 @@ private:
         http::response<http::string_body> response;
         beast::flat_buffer buffer;
         beast::error_code finalEc;
+        Http::ParsedUrl url;
+        tcp::resolver::results_type resolveResults;
 
         RequestSession() : resolver(ioc), stream(ioc) {
         }
@@ -53,12 +55,11 @@ private:
     // Async-цепочка: resolve → connect → write → read
     // Каждый шаг запускает следующий через completion handler
 
-    void resolveAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url) const;
+    void resolveAsync(const std::shared_ptr<RequestSession>& session) const;
 
-    void connectAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url,
-                      const tcp::resolver::results_type& results) const ;
+    void connectAsync(const std::shared_ptr<RequestSession>& session) const ;
 
-    void writeAsync(const std::shared_ptr<RequestSession>& session, const Http::ParsedUrl& url) const ;
+    void writeAsync(const std::shared_ptr<RequestSession>& session) const ;
 
     void readAsync(const std::shared_ptr<RequestSession>& session) const ;
 

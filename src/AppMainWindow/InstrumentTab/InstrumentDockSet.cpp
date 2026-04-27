@@ -11,6 +11,10 @@ InstrumentDockSet::InstrumentDockSet(InstrumentContext* context, const std::shar
                                                         , _context(context)
                                                         , _session(new InstrumentSession(context, fetcher, this)) {
     setupDocks();
+
+    connect(_session, &InstrumentSession::signal_candlesReady, this, &InstrumentDockSet::slot_PriceChartSetCandles);
+
+    _session->load();
 }
 
 InstrumentDockSet::~InstrumentDockSet() = default;
@@ -78,6 +82,16 @@ void InstrumentDockSet::slot_VdChartDockVisible(const bool visible) {
 
 void InstrumentDockSet::slot_ResetDocksLayout() {
     applyDefaultLayout();
+}
+
+void InstrumentDockSet::slot_PriceChartSetCandles() const {
+    _priceDock->widget()->setCandles(_session->candles());
+}
+
+void InstrumentDockSet::slot_CvdChartSetCandles() {
+}
+
+void InstrumentDockSet::slot_VdChartSetCandles() {
 }
 
 void InstrumentDockSet::setupDocks() {

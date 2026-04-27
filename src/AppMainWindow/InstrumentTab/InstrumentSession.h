@@ -18,12 +18,15 @@ public:
 
     ~InstrumentSession() override = default;
 
-    void load(Market::TimePoint from, Market::TimePoint till);
+    void load(Market::TimePoint from = std::chrono::system_clock::now() - std::chrono::days(30),
+          Market::TimePoint till = std::chrono::system_clock::now());
     void reload();
+    [[nodiscard]] std::vector<Market::Candle>& candles();
 
 signals:
     void signal_candlesReady();
-    void signal_loadError();
+    void signal_CvdReady();
+    void signal_LoadError(const QString& message);
 
 private:
     InstrumentContext* _context = nullptr;

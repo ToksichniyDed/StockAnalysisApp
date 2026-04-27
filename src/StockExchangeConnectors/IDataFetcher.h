@@ -52,7 +52,6 @@ namespace Exchange {
     protected:
         explicit IDataFetcher(std::shared_ptr<Parser::ConfigurationParser> configurationParser) : _configurationParser(
             std::move(configurationParser)) {
-
         };
 
     protected:
