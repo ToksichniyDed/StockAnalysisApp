@@ -13,6 +13,8 @@ InstrumentDockSet::InstrumentDockSet(InstrumentContext* context, const std::shar
     setupDocks();
 
     connect(_session, &InstrumentSession::signal_candlesReady, this, &InstrumentDockSet::slot_PriceChartSetCandles);
+    connect(_session, &InstrumentSession::signal_candlesReady, this, &InstrumentDockSet::slot_CvdChartSetCandles);
+    connect(_session, &InstrumentSession::signal_candlesReady, this, &InstrumentDockSet::slot_VdChartSetCandles);
 
     _session->load();
 }
@@ -89,6 +91,7 @@ void InstrumentDockSet::slot_PriceChartSetCandles() const {
 }
 
 void InstrumentDockSet::slot_CvdChartSetCandles() {
+    _cvdDock->widget()
 }
 
 void InstrumentDockSet::slot_VdChartSetCandles() {
@@ -102,7 +105,6 @@ void InstrumentDockSet::setupDocks() {
     connect(_priceDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_PriceChartDockChangedVisible);
     connect(_cvdDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_CvdChartDockChangedVisible);
     connect(_vdDock, &QDockWidget::visibilityChanged, this, &InstrumentDockSet::signal_VdChartDockChangedVisible);
-
 
     _mainWindow->addDockWidget(Qt::TopDockWidgetArea, _priceDock);
     _mainWindow->addDockWidget(Qt::BottomDockWidgetArea, _cvdDock);
