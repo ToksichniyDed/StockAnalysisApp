@@ -18,8 +18,8 @@ PriceChartWidget::PriceChartWidget(QWidget* parent) : QWidget(parent) {
     setAttribute(Qt::WA_OpaquePaintEvent);
 }
 
-void PriceChartWidget::setCandles(std::vector<Market::Candle>& candles) {
-    _candles = std::move(candles);
+void PriceChartWidget::setCandles(const std::vector<Market::Candle>& candles) {
+    _candles = candles;
 
     Logger::log<Logger::LogLevel::Debug>("Подгружены свечи {} штук !", _candles.size());
 

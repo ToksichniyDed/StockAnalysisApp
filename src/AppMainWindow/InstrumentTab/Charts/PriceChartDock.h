@@ -19,7 +19,7 @@ public:
     explicit PriceChartWidget(QWidget* parent = nullptr);
     ~PriceChartWidget() override = default;
 
-    void setCandles(std::vector<Market::Candle>& candles);
+    void setCandles(const std::vector<Market::Candle>& candles);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

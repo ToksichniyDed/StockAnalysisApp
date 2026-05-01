@@ -25,13 +25,20 @@ namespace Market {
     [[nodiscard]] inline std::string timeframeToString(const Timeframe tf)
     {
         switch (tf) {
-            case Timeframe::Minute1:  return "1m";
-            case Timeframe::Minute10: return "10m";
-            case Timeframe::Hour:     return "1h";
-            case Timeframe::Day:      return "1D";
-            case Timeframe::Week:     return "1W";
-            case Timeframe::Month:    return "1M";
-            case Timeframe::Quarter:  return "3M";
+            case Timeframe::Minute1:
+                return "1m";
+            case Timeframe::Minute10:
+                return "10m";
+            case Timeframe::Hour:
+                return "1h";
+            case Timeframe::Day:
+                return "1D";
+            case Timeframe::Week:
+                return "1W";
+            case Timeframe::Month:
+                return "1M";
+            case Timeframe::Quarter:
+                return "3M";
         }
         return "?";
     }

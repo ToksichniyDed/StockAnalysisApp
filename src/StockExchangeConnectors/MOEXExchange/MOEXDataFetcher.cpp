@@ -11,15 +11,15 @@ MOEXDataFetcher::MOEXDataFetcher(const std::filesystem::path& filePath,
                                  std::shared_ptr<IHttpClient> httpClient,
                                  std::shared_ptr<MOEXResponseParser> responseParser,
                                  const std::shared_ptr<Parser::ConfigurationParser>&
-                                 configurationParser) : IDataFetcher(configurationParser.get() ? configurationParser :
+                                 configurationParser) : IDataFetcher(configurationParser ? configurationParser :
                                                             std::make_shared<Parser::ConfigurationParser>(
                                                                 filePath.empty() ? MOEX_CONFIG_PATH : filePath)),
                                                         _httpClient(
-                                                            httpClient.get()
+                                                            httpClient
                                                             ? httpClient
                                                             : HttpClientFactory::instance().create("default")),
                                                         _moexResponseParser(
-                                                            responseParser.get()
+                                                            responseParser
                                                             ? responseParser
                                                             : std::make_shared<MOEXResponseParser>()) {
 }
